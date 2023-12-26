@@ -14,6 +14,7 @@ include( "core.jl" )
 include( "shapes.jl" )
 include( "textStim.jl" )
 include( "events.jl" )
+include( "imageStim.jl" )
 include( "SDL2_gfxPrimitives.jl" )
 
 export InitPsychoJL,  MakeInt8Color
@@ -21,10 +22,10 @@ export window, close, flip, Window
 export rect, sdl_ellipse, draw, line
 export textStim
 export waitKeys, getKey
-
+export imageStim
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/textStim.jl
-#-==============================================
+#-==============================================0
 # scratchpad for future PsychoJL functions, structs, and stuff
 #=
 
@@ -32,14 +33,15 @@ ToDo
 	√	TextStim STruct
 	GEt and show images
 	√	waitKeys
-	draw for ellipse (not sdl_ellipse() )
+	√	draw for ellipse (not sdl_ellipse() )
 	change color methods so that they can handle 255, 1.0, and Psychopy
 	√	add line	
-	thickLineRGBA looks like shit. How can I anti-alias?
-	add fullscreen to windo
+	√	thickLineRGBA looks like shit. How can I anti-alias?
+	√	add fullscreen to window
 	show images
 	add documenter
-	upload to github
+	√	upload to github
+	Need Gui interface for getting information
 =#
 
 #----------

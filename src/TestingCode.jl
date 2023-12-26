@@ -156,6 +156,10 @@ function DemoWindow()
 	SDL_RenderDrawLineF(myWin.renderer, 1620.5, 10, 1920.5, 310 )		# 45°
 	SDL_RenderDrawLineF(myWin.renderer, 1630, 10, 1930, 310 )		# 45°
 	#------------------------------------------------------
+	imagePath = joinpath(dirname(pathof(SimpleDirectMediaLayer)), "..", "assets", "cat.png")
+	myImage = imageStim(myWin, imagePath)
+	draw(myImage, magnification = 10.0)
+
 	flip(myWin)
 end
 

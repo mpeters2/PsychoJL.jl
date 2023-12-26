@@ -80,7 +80,7 @@ function draw(L::Line)
 
 	end
 
-	drawStartPoint(L.win.renderer,L.startPoint[1] ,L.startPoint[2] )
+#	drawStartPoint(L.win.renderer,L.startPoint[1] ,L.startPoint[2] )
 end
 #-==========================
 
