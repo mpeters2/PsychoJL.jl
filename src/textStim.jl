@@ -1,4 +1,4 @@
-export textStim, draw
+export textStim, draw, TextStim
 
 #-================================================================================================================
 # TextStim
@@ -12,6 +12,9 @@ mutable struct TextStim	#{T}
 	color::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
 	fontName::String						
 	fontSize::Int64
+	orientation::Int64
+	justification::String
+	scale::Float64
 	font::Ptr{TTF_Font}
 end
 
@@ -22,7 +25,10 @@ function textStim(win::Window,
 				color::Vector{Int64} = fill(128, (3)),			# these will need to change to floats to handle Psychopy colors
 				fontName::String = "",
 				fontSize::Int64 = 12,
-				font::Any = nothing											# font is for internal use and is a pointer to a TTF
+				orientation::Int64 = 0,
+				justification = "left",							# left, center, or right
+				scale = 1,										# magnifies the bitmap, but does not change font size
+				font::Any = nothing											# font is for internal use and is a pointer to a TTF	
 				)
 	if fontName == ""
 		font = win.font
@@ -37,6 +43,9 @@ function textStim(win::Window,
 				color,
 				fontName,
 				fontSize,
+				orientation,
+				justification,
+				scale,
 				font,				# these will need to change to floats to handle Psychopy colors
 				)
 	return textStruct
@@ -66,11 +75,36 @@ function draw(text::TextStim)
 	h = Ref{Cint}()
 	TTF_SizeText(text.font, text.textMessage, w::Ref{Cint}, h::Ref{Cint})		# Ref is used if Julia controls the memory
 	#println("w: ", w,", value = ", w[] )
-	Message_rect = SDL_Rect(50, 50, w[], h[])
+#	Message_rect = SDL_Rect(50, 50, w[], h[])
+	Message_rect = SDL_Rect(text.pos[1], text.pos[2], w[], h[])
+	if text.scale != 1								# scale the text.  Not the same as changing the font size.
+		Message_rect = SDL_Rect(text.pos[1], text.pos[2], sTruncInt( w[] * text.scale),sTruncInt( h[] * text.scale))	
+	end
+	if text.justification == "center"
+		center = SDL_Point(w[]÷2, h[]÷2)											# ÷ is integer divide
+	elseif text.justification == "left"
+		center = SDL_Point(0, h[]÷2)											# ÷ is integer divide
+	elseif text.justification == "right"
+		center = SDL_Point(w[], h[]÷2)											# ÷ is integer divide
+	else		# default is left justified at the bottom
+		center = SDL_Point(0, h[])											# ÷ is integer divide
+	end
 
-	SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
-
+	if text.orientation == 0 
+		SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+	else
+		SDL_RenderCopyEx(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect), text.orientation, Ref{SDL_Point}(center), SDL_FLIP_NONE)
+	#	SDL_RenderCopyExF(  <<< FUTURE WITH FLOATS
+	end
 	# Don't forget to free your surface and texture
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(Message);
+end
+#----------
+function setSize(text::TextStim, fontSize::Int64)
+	println("setSize(::TextStim, fontsize) is a future placeholder for loading a font of the specific size")
+end
+#----------
+function setFont(text::TextStim, fontName::String)
+	println("setFont(::TextStim, fontName) is a future placeholder for loading a font of the specified name")
 end

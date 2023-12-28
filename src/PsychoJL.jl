@@ -16,10 +16,15 @@ include( "textStim.jl" )
 include( "events.jl" )
 include( "SDL2_gfxPrimitives.jl" )
 
+sTruncInt(x) = floor(Int, x)				# for typecasting floats to ints when indexing
+#------
+sLrint(x) = sTruncInt(round(x))
+
+
 export InitPsychoJL,  MakeInt8Color
 export window, close, flip, Window
 export rect, sdl_ellipse, draw, line
-export textStim
+export textStim, TextStim
 export waitKeys, getKey
 
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl
@@ -29,17 +34,19 @@ export waitKeys, getKey
 #=
 
 ToDo
+	Add multiple coordinate systems
 	√	TextStim STruct
-	GEt and show images
+	√	GEt and show images
 	√	waitKeys
-	draw for ellipse (not sdl_ellipse() )
+	√	draw for ellipse (not sdl_ellipse() )
 	change color methods so that they can handle 255, 1.0, and Psychopy
 	√	add line	
-	thickLineRGBA looks like shit. How can I anti-alias?
-	add fullscreen to windo
-	show images
+	√	thickLineRGBA looks like shit. How can I anti-alias?
+	√	add fullscreen to windo
+	√	show images
 	add documenter
 	upload to github
+	rewrite using float versions, suchs as SDL_FRect, SDL_RenderFillRectF(), SDL_RenderCopyExF(), etc.
 =#
 
 #----------

@@ -33,10 +33,15 @@ function window(	size,			# window size; static array (stay away from tuples)
 	renderer = SDL_CreateRenderer(winPtr, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
 #	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND)
 
-	font = 	TTF_OpenFont("/Users/MattPetersonsAccount/Documents/Development/Julia/PsychoJL/sans.ttf", 24);
+	fontDirectory = "/System/Library/Fonts"
+	fontPath = joinpath(fontDirectory, "Monaco.ttf")
+	font = 	TTF_OpenFont(fontPath, 48);
+#	font = 	TTF_OpenFont("/Users/MattPetersonsAccount/Documents/Development/Julia/PsychoJL/sans.ttf", 24);
 #	if font 
 	if font == C_NULL
 		println("*** Error: font is NULL")
+		#println("\t", SDL_GetError() )			#		TTF_GetError
+		println(unsafe_string(SimpleDirectMediaLayer.SDL_GetError()))
 	end
 	event = Ref{SDL_Event}()
 
@@ -72,3 +77,4 @@ function flip(win::Window)
 	SDL_RenderClear(win.renderer)			# <<< Had to do this to clear out the noise.
 end
 #-===============================================
+# /System/Library/Fonts

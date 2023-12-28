@@ -17,9 +17,7 @@ export rect, ellipse, draw
 export line
 
 
-sTruncInt(x) = floor(Int, x)				# for typecasting floats to ints when indexing
-#------
-sLrint(x) = sTruncInt(round(x))
+
 #-==================================================================
 mutable struct Line	#{T}
 	win::Window
