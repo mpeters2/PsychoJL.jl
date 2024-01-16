@@ -1,9 +1,24 @@
 module PsychoJL
+
+# need to make an alignment option for all widgets, like I did with textStim.
+
+# Look at this about scaling and SDL with  SDL_WINDOW_ALLOW_HIGHDPI   https://discourse.libsdl.org/t/high-dpi-mode/34411/7
+# Need to add copyright for whatever fotn I am using.
+
+#=
+
+- link to [core.jl](@ref)
+- link to [`InitPsychoJL()`](@ref)
+- link to [`MakeInt8Color(r,g,b,a)`](@ref)
+=#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 using SDL2_ttf_jll
 using StaticArrays
+#using Documenter
+using JET
+
 
 println("---------------------------- NEW RUN -----------------------------")
 print("\ncurrent directory: ", pwd(),"\n\n")
@@ -15,14 +30,23 @@ include( "shapes.jl" )
 include( "textStim.jl" )
 include( "events.jl" )
 include( "imageStim.jl" )
+include( "buttons.jl" )
 include( "SDL2_gfxPrimitives.jl" )
+include( "gui.jl" )
+include( "popUpMenu.jl" )
 
-export InitPsychoJL,  MakeInt8Color
-export window, close, flip, Window
+export InitPsychoJL,  MakeInt8Color, wait
+export window, close, flip, Window, closeWinOnly, hideWindow
 export rect, sdl_ellipse, draw, line
 export textStim
 export waitKeys, getKey
 export imageStim
+export displayMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
+export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA
+export ButtonStim, ButtonMap, buttonDraw, buttonDrawClicked, buttonStim
+export PopUpMenu, PopUpMap
+
+
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/textStim.jl
 #-==============================================0
@@ -30,8 +54,10 @@ export imageStim
 #=
 
 ToDo
+	Fix super hi-res scaling issue
+	add a gui
 	√	TextStim STruct
-	GEt and show images
+	√	GEt and show images
 	√	waitKeys
 	√	draw for ellipse (not sdl_ellipse() )
 	change color methods so that they can handle 255, 1.0, and Psychopy

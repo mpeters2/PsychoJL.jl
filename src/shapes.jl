@@ -98,6 +98,7 @@ function getLineLength(L::Line)
 	return sqrt( ((L.startPoint[1] - L.endPoint[1]) ^2)  + ((L.startPoint[2] - L.endPoint[2])^2) )
 end
 #-=====================================================================================================
+# Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.
 mutable struct Rect	#{T}
 	win::Window
 	width::Int64							# this will need to change to floats for Psychopy height coordiantes

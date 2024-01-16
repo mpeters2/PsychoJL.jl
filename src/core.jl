@@ -1,10 +1,8 @@
 # Translation of psycopy window file to Julia
 
-export InitPsychoJL, MakeInt8Color
+export InitPsychoJL, MakeInt8Color, wait
 
-# Part of the PsychoPy library
-# Copyright (C) 2002-2018 Jonathan Peirce (C) 2019-2022 Open Science Tools Ltd.
-# Distributed under the terms of the GNU General Public License (GPL).
+
 #using SimpleDirectMediaLayer
 #using SimpleDirectMediaLayer.LibSDL2
 
@@ -12,6 +10,18 @@ export InitPsychoJL, MakeInt8Color
 
 
 #----------
+"""
+	InitPsychoJL()
+
+Initializes PsychoJL module.
+
+inputs: None\n
+outputs: None
+
+Module for writing psychology and psychophysics experiments.
+
+Matt Peterson, 2023-2024
+"""
 function InitPsychoJL()
 
 	@assert SDL_Init(SDL_INIT_EVERYTHING) == 0 "error initializing SDL: $(unsafe_string(SDL_GetError()))"
@@ -20,8 +30,16 @@ function InitPsychoJL()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16)			# the number of samples used around the current pixel used for multisample anti-aliasing
 
 end
-#----------
-#Int8Color::Vector{Int8}{T}
+#-=================================================
+"""
+	MakeInt8Color(r,g,b,a)
+
+Packs 8-bit red, green, blue, alpha values into a 32-bit Int.
+
+inputs: Four integers of any type
+outputs: UInt32
+
+"""
 
 function MakeInt8Color(r,g,b,a)
 
@@ -44,6 +62,28 @@ println("color = ", color) #, "\n")
 #------
 	return color
 end
+#-=================================================
+"""
+	wait(win::Window, time::Float64)
+
+Pauses for a set amount of time. Time scale (second or milliseconds) is set
+when making the Window.
+
+inputs: PsychoJL Window, 64-bit float\n
+outputs: Nothing
+
+"""
+
+function wait(win::Window, time::Float64)
+	if win.timeScale == "milliseconds"
+		SDL_Delay(time)		
+	elseif win.timeScale == "seconds"
+		SDL_Delay(time * 1000)	
+	end
+end
+
+#-=================================================
+
 #-=========
 
 function dec2hex255(number)

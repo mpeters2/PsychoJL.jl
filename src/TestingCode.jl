@@ -6,11 +6,31 @@ using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 using SDL2_ttf_jll
 using SDL2_gfx_jll
+using Revise
+using JET
+
+#=
+	√	missing textbox
+	√	need down arrows for pop-ups
+	√	button is missing text
+	√	need to center OK button at 75%
+	√	add Cancel button at 25%
+	√	fix pop-up text and highlighting
+	√	add event loop
+	√	change draw functions to just "draw" so I can loop through them
+	√	add mouse-driven focus
+
+	need to return struct full of values
+	change the spacing of the labels and widgets so that they are closer to eachother
+	have window size be based on number of widgets
+	make pop-ups and text entries prettier
+=#
+
 
 # look at thick lines
 # overload int and float versions
 #-----------------
-#=
+
 const Sint16 = Int16
 const Uint8 = UInt8
 
@@ -21,11 +41,32 @@ function aalineRGBA(renderer, x1, y1, x2, y2, r, g, b, a)
     ccall((:aalineRGBA, libsdl2), Cint, (Ptr{SDL_Renderer}, Sint16, Sint16, Sint16, Sint16, Uint8, Uint8, Uint8, Uint8), renderer, x1, y1, x2, y2, r, g, b, a)
 end
 #/Users/MattPetersonsAccount/Documents/Development/Julia/PaddleBattle.jl-master/libs/libSDL2-2.0.0.dylib
-=#
+
 #-----------------
 
 function DemoWindow()
+ 
+
+#	resp, entry_text = inputDialog("Subject ID: ", "000")
+#println(resp, entry_text)
+#	displayMessage(" a message")
+#	displayError(" an error")
+#	displayWarning(" a warning")
 	InitPsychoJL()
+
+	#------------------------------------------
+	exp_info = Dict("subject_nr"=>0, "age"=>0, "handedness"=>("right","left","ambi"), 
+            "gender"=>("male","female","other","prefer not to say"))
+
+
+	new_info = DlgFromDict(exp_info)
+
+	println("\n New experiment info from dialog: \n\t", new_info)
+
+	#------------------------------------------
+	IDnumber = textInputDialog("Subject Info", "Enter the subject ID number", "000")
+	println("Id number received is", IDnumber)
+
 	myWin = window( [1000,1000], false)
 
 	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable window.  Scales contents when resized
@@ -34,6 +75,107 @@ function DemoWindow()
 
 
 	mRect = SDL_Rect(250, 150, 200, 200)					# wacky Julia struct constructor; x,y, widht, height
+
+
+	displayMessage(myWin,  "Something happened")
+
+
+
+	wuAACircle(myWin.renderer, 
+				150.0, 
+				600.0, 
+				50.0, 
+				0.0, 
+				90.0, 
+				255, 255, 255, 255)
+
+	aaRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+							100, 
+							700, 
+							200, 
+							750, 
+							20, 
+							255, 128, 0, 255)
+	aaRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+							102, 
+							702, 
+							198, 
+							748, 
+							18, 
+							255, 128, 0, 255)
+
+	aaRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+							100, 
+							800, 
+							200, 
+							850, 
+							10, 
+							255, 128, 0, 255)
+	aaRoundRectRGBAThick(myWin.renderer, 			#roundedRectangleRGBA
+							100, 
+							900, 
+							200, 
+							950, 
+							20, 
+							4,
+							255, 255, 0, 255)
+
+	aaRoundRectRGBAThick(myWin.renderer, 			#roundedRectangleRGBA
+							100, 
+							600, 
+							300, 
+							675, 
+							30, 
+							7,
+							255, 255, 0, 255)
+
+
+	aaFilledRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+
+							500,
+							700,
+							968,
+							768,
+							17,
+							131, 149, 247, 255)				
+#454, 54
+	aaFilledRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+
+							507,
+							707,
+							961,
+							761,
+							13,
+							64, 135, 247, 255)				
+	aaRoundRectRGBA(myWin.renderer, 			#roundedRectangleRGBA
+							507,
+							707,
+							961,
+							761,
+							13,
+							45, 97, 228, 255)	
+	buttonText = textStim(myWin,  
+							"OK", 
+							[734, 734], 
+							color = [255, 255, 255], 
+							fontSize = 24, 
+							horizAlignment = 0, 
+							vertAlignment = 0,
+							style = "bold")
+	draw(buttonText)		
+#=
+TextBox( t::String,  font::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}, color::SDL_Color, renderer::Ptr{SDL_Renderer}, wrapWidth::Int64)
+
+	myfont = myWin.font
+    #char CharArray[2000]; // Create a char array
+   #strcpy_s(CharArray, t.c_str()); // Convert the string into a char array for the surface function.
+
+    Surface = TTF_RenderText_Blended_Wrapped(font, t, color, wrapWidth);	# Make into a surface.
+    Texture = SDL_CreateTextureFromSurface(renderer, Surface); 				# Turn the surface into a texture.
+    TTF_SizeText(font, CharArray, &w, &h);									# Size the texture so it renders the text correctly.
+end
+=#
+
 
 
 	psychoRect = rect(myWin, 100, 100, [400,400], lineColor = [255,0,0], fillColor = [255,128,128] )
@@ -167,8 +309,9 @@ end
 #font = FC_CreateFont();  
 #FC_LoadFont(font, renderer, "fonts/FreeSans.ttf", 20, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);  
 
+#@report_opt DemoWindow()
+#@report_call DemoWindow()
 DemoWindow()
-
 
 
 SDL_Delay(2000)
@@ -176,3 +319,11 @@ SDL_Delay(2000)
 
 exit()
 
+
+
+#=
+
+i should make it unclicked and slection mode
+need state to change state with each click
+
+=#
