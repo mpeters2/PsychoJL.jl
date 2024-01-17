@@ -54,6 +54,9 @@ mutable struct InputBox
 	function InputBox( win::Window, valueText::String, leftTop::Vector{Int64}, size::Vector{Int64}, key::String = "no-key-given")
 		# should probably check to see if theses are valid, or flip their order if needed
 	
+		if valueText == ""
+			valueText = " "
+		end
 		textTexture = loadFromRenderedText(win, valueText, SDL_Color(0,0,0,255))
 		rightBottom = [ leftTop[1] + size[1],leftTop[2] + size[2] ]
 		pos = [(leftTop[1] + rightBottom[1])÷2,(leftTop[2] + rightBottom[2])÷2]

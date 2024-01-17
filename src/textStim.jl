@@ -16,6 +16,7 @@ mutable struct TextStim	#{T}
 	horizAlignment::Int64					# -1 for left, 0 for center, +1 for right
 	vertAlignment::Int64					# -1 aligns at top, 0 for center, +1 aligns at bottom
 	style::String							# bold, italic, etc.
+	orientation::Int64
 end
 
 #----------
@@ -28,7 +29,8 @@ function textStim(win::Window,
 				font::Any = nothing,											# font is for internal use and is a pointer to a TTF
 				horizAlignment::Int64 = 1,
 				vertAlignment::Int64 = 1,
-				style::String = "normal"
+				style::String = "normal",
+				orientation::Int64 = 0
 				)
 	if fontName == ""
 		font = win.font
@@ -46,7 +48,8 @@ function textStim(win::Window,
 				font,				# these will need to change to floats to handle Psychopy colors
 				horizAlignment,
 				vertAlignment,
-				style
+				style,
+				orientation
 				)
 	return textStruct
 end
@@ -124,7 +127,14 @@ function draw(text::TextStim)
 
 	Message_rect = SDL_Rect(x, y, w[], h[])
 
-	SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+	#SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+	if text.orientation == 0 
+		SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+	else
+		center = SDL_Point(x, y)
+		SDL_RenderCopyEx(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect), text.orientation, Ref{SDL_Point}(center), SDL_FLIP_NONE)
+	#	SDL_RenderCopyExF(  <<< FUTURE WITH FLOATS
+	end
 
 	# Don't forget to free your surface and texture
 	SDL_FreeSurface(surfaceMessage);

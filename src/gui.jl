@@ -1,4 +1,4 @@
-
+# Might want to make a larger window for instructions, with buttons for OK and Back (incase they went too fast)
 
 #using .Gtk: draw as GTKdraw
 #import Gtk			# this prevents namespace collisions between Gtk's draw() and PsychoJL's draw() functions
@@ -76,6 +76,324 @@ function showMessageBullshitExample(message::String)
         SDL_Log("selection was %s", buttons[buttonid].text);
     end
     return 0;
+end
+#-=============================================
+function textInputDialog( promptString::String, defaultText::String)
+	SCREEN_WIDTH = 350
+	SCREEN_HEIGHT = 150
+	DoubleWidth = SCREEN_WIDTH * 2									# I don't know if this is a workaround for Retina or SDL_WINDOW_ALLOW_HIGHDPI, but a 400 pixel width yields 800 pixels 
+
+	firstRun = true
+	buttonClicked = "NoButton"
+	quit::Bool = false;
+
+	mX = Ref{Cint}()					# pointers that will receive mouse coordinates
+	mY = Ref{Cint}()
+
+	cursorLocation = 0											# after the last character.  This is in charachter units, not pixels
+																# this cycles during each refresh from true to false
+	onTime = 0												# for timing of cursor blinns
+	# these are used later to get the size of the text when moving the cursor
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+
+	SDLevent = Ref{SDL_Event}()									#Event handler
+	
+	textColor =  SDL_Color(0, 0, 0, 0xFF)						#Set text color as black
+
+	InitPsychoJL()
+
+	dialogWin = window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
+
+	SDLwindow = dialogWin.win
+	renderer = dialogWin.renderer
+
+	#Globals = SDLGlobals(SDLwindow, renderer, LTexture(C_NULL, 0 ,0), LTexture(C_NULL, 0 ,0) )
+	
+	gFont = dialogWin.font
+
+	if gFont == C_NULL
+		println("*** Error: gFont is NULL")
+	end
+	SDL_PumpEvents()					# this erases whatever random stuff was in the backbuffer
+	SDL_RenderClear(renderer)			#
+
+	TTF_SizeText(gFont, "Abcxyz", w, h)
+	#-===== Their code:
+	#The current input text.
+	#inputText::String = "Some Text";
+
+	inputText = defaultText
+	#TTF_SetFontStyle(gFont, TTF_STYLE_ITALIC)
+	#Globals.promptTextTexture = loadFromRenderedText(Globals, promptString, textColor,  dialogWin.italicFont);		# inputText.c_str(), textColor );
+	#leftX = (SCREEN_WIDTH - Globals.promptTextTexture.mWidth)÷2					
+	promptText = textStim(dialogWin, promptString, [SCREEN_WIDTH, 20 ],		# you would think it would be SCREEN_WIDTH÷2, but hi-res messes it centers at SCREEN_WIDTH÷4.
+							color = [0, 0, 0], 
+							fontSize = 24, 
+							horizAlignment = 0, 
+							vertAlignment = -1,
+							style = "italic" )
+	#TTF_SetFontStyle(gFont, TTF_STYLE_NORMAL )
+
+	#Globals.inputTextTexture = loadFromRenderedText(Globals, inputText, textColor,  gFont);		# inputText.c_str(), textColor );
+
+	myInputBox = InputBox(dialogWin, 
+							defaultText, 
+							[35,	h[]÷2 + 17],
+							[ (DoubleWidth - 140)÷2, h[]÷2 + 5], 
+							""
+							)
+	#--------- Make buttons
+	buttonList = []
+	
+	OKtext = textStim(dialogWin, "OK",	[0, 0])
+	OKbutton = buttonStim(dialogWin,
+				[ round(Int64, SCREEN_WIDTH * 0.75), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
+				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
+				OKtext,					
+				"default")
+	push!(buttonList, ButtonMap(OKbutton, "OK-clicked") )
+
+	CancelText = textStim(dialogWin, "Cancel",	[0, 0])
+	CancelButton = buttonStim(dialogWin,
+				[ round(Int64, SCREEN_WIDTH * 0.25), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
+				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
+				CancelText,					
+				"other")
+	push!(buttonList, ButtonMap(CancelButton, "Cancel-clicked") )
+
+
+	#---------- end buttons
+	#---------- Make PopUp
+	popList = []
+	myPop = PopUpMenu(dialogWin, [70,100], [100, h[] + 10], ["Cat", "Dog", "Bird"] )
+
+
+	push!(popList, PopUpMap(myPop ) )
+	#---------- end buttons
+	#Enable text input
+	SDL_StartTextInput();
+
+	#=
+	Before we go into the main loop we declare a string to hold our text and render it to a texture. We then call 
+	SDL_StartTextInput so the SDL text input functionality is enabled.
+	=#
+
+	#While application is running
+
+	while( !quit )
+
+		renderText::Bool = false;					# The rerender text flag
+
+		while Bool(SDL_PollEvent(SDLevent))			# Handle events on queue
+			event_ref = SDLevent
+			evt = event_ref[]
+			evt_ty = evt.type
+			evt_key = evt.key
+			evt_text = evt.text
+			evt_mouseClick = evt.button
+ 	
+			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
+		
+			if( evt_ty == SDL_KEYDOWN )							#Special key input
+				println("evt_key.keysym.sym = ", evt_key.keysym.sym )
+				#Handle backspace
+				if( evt_key.keysym.sym == SDLK_BACKSPACE && length(inputText) > 0 )
+					if (length(inputText) - cursorLocation - 1) >= 0
+						newString = first(inputText, length(inputText) - cursorLocation - 1)
+					else
+						newString = ""
+					end
+					println(cursorLocation," ",newString)
+					inputText = newString * last(inputText, cursorLocation)
+					#inputText = String(chop(inputText, tail = 1))				# remove last item; chop return a substring, so we have to cast it as String
+					renderText = true;
+					cursorLocation += 1											# move cursor as text expands
+				elseif evt_key.keysym.sym == SDLK_RETURN || evt_key.keysym.sym == SDLK_KP_ENTER
+					return ["OK", inputText]
+				elseif evt_key.keysym.sym == SDLK_LEFT 
+					cursorLocation += 1			
+				elseif evt_key.keysym.sym == SDLK_RIGHT 
+					cursorLocation -= 1
+					if cursorLocation <= 0
+						cursorLocation = 0
+					end	
+				end
+
+				# SDLK_LEFT, SDLK_RIGHT
+				# SDLK_LEFT = 1073741904
+				# SDLK_RIGHT = 1073741903
+			#=
+			There are a couple special key presses we want to handle. When the user presses backspace we want to remove the last character 
+			from the string. When the user is holding control and presses c, we want to copy the current text to the clip board using 
+			SDL_SetClipboardText. You can check if the ctrl key is being held using SDL_GetModState.
+
+			When the user does ctrl + v, we want to get the text from the clip board using SDL_GetClipboardText. This function returns a 
+			newly allocated string, so we should get this string, copy it to our input text, then free it once we're done with it.
+
+			Also notice that whenever we alter the contents of the string we set the text update flag.
+			=#
+			#Special text input event
+			elseif( evt_ty == SDL_TEXTINPUT )
+				textTemp = NTupleToString(evt_text.text)
+				if (length(inputText) - cursorLocation ) >= 0
+						leftString = first(inputText, length(inputText) - cursorLocation )
+				else
+					leftString = ""
+				end
+				inputText = leftString * textTemp * last(inputText, cursorLocation)
+				#inputText = inputText * textTemp				# * is Julila concatenate
+				renderText = true;
+				
+			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )
+				x = evt_mouseClick.x
+				y = evt_mouseClick.y
+				for butMap in buttonList
+					println(butMap.leftTop,", ",butMap.rightBottom)
+					if (butMap.rightBottom[1] > x > butMap.leftTop[1]) && (butMap.rightBottom[2] > y > butMap.leftTop[2])
+						butMap.state = "clicked"
+					end
+				end
+				for popMap in popList
+					if (popMap.rightBottom[1] > x > popMap.leftTop[1]) && (popMap.rightBottom[2] > y > popMap.leftTop[2])
+						#popMap.popUp.state = "clicked"
+						println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
+						stateChange(popMap)
+						draw(popMap.popUp, [x,y])					# enter pop-up button drawing and selection loop
+					end
+				end
+			
+			#=elseif( evt_ty == SDL_MOUSEBUTTONUP )
+				x = evt_mouseClick.x
+				y = evt_mouseClick.y
+				for popMap in popList
+					if (popMap.rightBottom[1] > x > popMap.leftTop[1]) && (popMap.rightBottom[2] > y > popMap.leftTop[2])
+						#popMap.popUp.state = "unclicked"
+						draw(popMap.popUp, [x,y])					# enter pop-up button drawing and selection loop
+					end
+				end
+			=#
+			end
+		end
+		#=
+		With text input enabled, your key presses will also generate SDL_TextInputEvents which simplifies things like shift key and caps lock. 
+		Here we first want to check that we're not getting a ctrl and c/v event because we want to ignore those since they are already handled 
+		as keydown events. If it isn't a copy or paste event, we append the character to our input string.
+		=#
+	
+		if( renderText )						# Rerender text if needed
+			if( inputText != "" )				# Text is not empty
+				#Render new text
+				#Globals.inputTextTexture = loadFromRenderedText(Globals,  inputText, textColor,  gFont);	# inputText.c_str(), textColor );
+				draw(myInputBox)
+			else								#Text is empty
+				#Render space texture
+				InputBox.valueText = " "
+				#Globals.inputTextTexture = loadFromRenderedText(Globals, " ", textColor, gFont );
+			end
+		end
+		#=
+		If the text render update flag has been set, we rerender the texture. One little hack we have here is if we have an empty string, 
+		we render a space because SDL_ttf will not render an empty string.
+		=#
+
+		SDL_SetRenderDrawColor(renderer, 250, 250, 250, 255)
+		SDL_RenderClear( renderer );
+
+		#Render text textures
+
+
+		draw(promptText)
+		
+#		myInputBox = InputBox( [35,	Globals.promptTextTexture.mHeight÷2 + 17],
+#								 [ (DoubleWidth - 140)÷2, Globals.inputTextTexture.mHeight÷2 + 5
+#								 ] )
+#		drawInputBox(renderer, myInputBox)
+		
+		#=
+					SDL_Rect( 70,
+							floor(Int64,(Globals.promptTextTexture.mHeight)) + 35,
+							DoubleWidth - 140, 
+							Globals.inputTextTexture.mHeight + 10
+							)
+						=#
+#=
+		render(Globals.renderer, 
+				Globals.inputTextTexture,  
+				#40, #floor(Int64,( SCREEN_WIDTH - Globals.inputTextTexture.mWidth ) / 2 ), 
+				#DoubleWidth - (Globals.inputTextTexture.mWidth + 20),
+				DoubleWidth - 70 - (Globals.inputTextTexture.mWidth + 10),
+				floor(Int64,(Globals.promptTextTexture.mHeight)) + 40,
+				Globals.inputTextTexture.mWidth, 
+				Globals.inputTextTexture.mHeight );
+=#
+		#-------------------
+		# need to get size of text for cursor using cursorLocation
+		TTF_SizeText(gFont, last(inputText, cursorLocation), w::Ref{Cint}, h::Ref{Cint})		# Ref is used if Julia controls the memory
+		cursorScootch = w[]
+		#-------------------
+		if (time() - onTime) < 1
+			thickLineRGBA(renderer,
+							DoubleWidth - 70 - 10 - cursorScootch, 
+							floor(Int64, h[]) + 45, 
+							DoubleWidth - 70 - 10 - cursorScootch, 
+							floor(Int64, h[]) + 75, 
+							3, 
+							0, 0, 0, 255)
+
+			cursorBlink = false
+
+		elseif   1 < (time() - onTime) < 2				# show during this time
+			#vlineRGBA(Globals.renderer, DoubleWidth - 70, floor(Int64,(Globals.promptTextTexture.mHeight)), floor(Int64,(Globals.promptTextTexture.mHeight)) + 40, 0, 250, 0, 255);
+			thickLineRGBA(renderer,
+							DoubleWidth - 70 - 10 - cursorScootch, 
+							 floor(Int64, h[]) + 45, 
+							DoubleWidth - 70 - 10 - cursorScootch, 
+							floor(Int64, h[] ) + 75, 
+							3, 
+							255, 250, 255, 255)
+			cursorBlink = true
+
+		else				# reset after 1 cycle
+			onTime = time()
+			#println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> else ", time() - offTime,", ", time() - onTime)
+		end
+
+		#Update screen
+		for butMap in buttonList									# button maps help with managing clicks
+			if butMap.state == "unclicked"
+				buttonDraw(butMap.button)
+			elseif butMap.state == "clicked"
+				buttonDrawClicked(butMap.button)
+				butMap.state = "unclicked"
+				quit = true
+				buttonClicked = butMap.button.textStim.textMessage
+			end
+		end
+
+		#if firstRun == true
+			SDL_GetMouseState(mX, mY)
+			draw(myPop, [ mX[], mY[] ] )
+			firstRun = false
+			#println("drew popup")
+		#end
+		SDL_RenderPresent( renderer );
+		# check for enter or cancel
+	end
+	#	At the end of the main loop we render the prompt text and the input text.
+
+	
+	SDL_StopTextInput();										#Disable text input
+
+	hideWindow(dialogWin)
+	SDL_RenderPresent( renderer );
+	#SDL_DestroyWindow(SDL_Window * window)
+	closeWinOnly(dialogWin)
+
+	return [buttonClicked, inputText]
+
+
+
 end
 #-=============================================
 function textInputDialog(dlgTitle::String, promptString::String, defaultText::String)
@@ -443,15 +761,16 @@ function DlgFromDict(dlgDict::Dict)
 	SDLwindow = dialogWin.win
 	renderer = dialogWin.renderer
 
-	Globals = SDLGlobals(SDLwindow, renderer, LTexture(C_NULL, 0 ,0), LTexture(C_NULL, 0 ,0) )
+	#Globals = SDLGlobals(SDLwindow, renderer, LTexture(C_NULL, 0 ,0), LTexture(C_NULL, 0 ,0) )
 	
-	gFont = TTF_OpenFont("/Users/MattPetersonsAccount/Documents/Development/Julia/PsychoJL/sans.ttf", 36);		# global font
+	gFont = dialogWin.font
+
 	if gFont == C_NULL
 		println("*** Error: gFont is NULL")
 	end
 	SDL_PumpEvents()									# this erases whatever random stuff was in the backbuffer
-	SDL_SetRenderDrawColor(Globals.renderer, 250, 250, 250, 255)
-	SDL_RenderClear(Globals.renderer)		
+	SDL_SetRenderDrawColor(dialogWin.renderer, 250, 250, 250, 255)
+	SDL_RenderClear(dialogWin.renderer)		
 	#--- DictDlg really starts here ------------------------
 	# 	- find widest key and draw the key labels
 	widestKey = 20										# arbitrary minimum size
@@ -520,6 +839,9 @@ function DlgFromDict(dlgDict::Dict)
 		if value isa String || value isa Number									# input text box
 			if value isa Number
 				value = string(value)											# convert numbers to strings
+			end
+			if value == ""
+				value = " "														#requires at least one charcters
 			end
 			myInputBox = InputBox(dialogWin, value, [leftSide,	topSide÷2 ],		#-8
 							[SCREEN_WIDTH - (widestKey + 60), h[]÷2 + 2	], 
@@ -873,7 +1195,7 @@ function DlgFromDict(dlgDict::Dict)
 			cursorScootch = w[]
 			#-------------------
 			if (time() - onTime) < 1
-				thickLineRGBA(Globals.renderer,
+				thickLineRGBA(dialogWin.renderer,
 								in.textRect.x + in.textRect.w -6 - cursorScootch, 
 								in.textRect.y +10,
 								in.textRect.x + in.textRect.w -6 - cursorScootch, 
@@ -885,7 +1207,7 @@ function DlgFromDict(dlgDict::Dict)
 
 			elseif   1 < (time() - onTime) < 2				# show during this time
 				#vlineRGBA(Globals.renderer, DoubleWidth - 70, floor(Int64,(Globals.promptTextTexture.mHeight)), floor(Int64,(Globals.promptTextTexture.mHeight)) + 40, 0, 250, 0, 255);
-				thickLineRGBA(Globals.renderer,
+				thickLineRGBA(dialogWin.renderer,
 								in.textRect.x + in.textRect.w -6 - cursorScootch, 
 								in.textRect.y +10,
 								in.textRect.x + in.textRect.w -6 - cursorScootch, 

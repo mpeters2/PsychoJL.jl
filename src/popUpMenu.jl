@@ -135,12 +135,20 @@ end
 #----------------------------
 function drawPopUpArrows(popUp::PopUpMenu)
 	verts = [ [-8, -8], [+8, -8], [0, +8]]
-	cX = popUp.rightBottom[1] - 15
+
+	verts1 = [ [-8, 2], [0, +10], [+8, 2]]
+	verts2 = [ [-8, -2], [0, -10], [+8, -2]]
+	cX = popUp.rightBottom[1] - 19
 	cY = popUp.pos[2]
-	for i in 1:(length(verts)-1)
-		draw( line(popUp.win, [cX + verts[i][1], cY + verts[i][2]], [cX + verts[i+1][1], cY + verts[i+1][2]], width = 3, lineColor = [160,160,255,255] ) )
+	for i in 1:(length(verts1)-1)
+		draw( line(popUp.win, [cX + verts1[i][1], cY + verts1[i][2]], [cX + verts1[i+1][1], cY + verts1[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
 	end
-	draw( line(popUp.win, [cX + verts[3][1], cY + verts[3][2]], [cX + verts[1][1], cY + verts[1][2]], width = 3, lineColor = [160,160,255,255] ) )
+	#draw( line(popUp.win, [cX + verts1[3][1], cY + verts1[3][2]], [cX + verts1[1][1], cY + verts1[1][2]], width = 4, lineColor = [255,255,255,255] ) )	# [160,160,255,255]
+
+	for i in 1:(length(verts2)-1)
+		draw( line(popUp.win, [cX + verts2[i][1], cY + verts2[i][2]], [cX + verts2[i+1][1], cY + verts2[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
+	end
+	#draw( line(popUp.win, [cX + verts2[3][1], cY + verts2[3][2]], [cX + verts2[1][1], cY + verts2[1][2]], width = 4, lineColor = [255,255,255,255] ) )	# [160,160,255,255]
 
 end
 #----------------------------
@@ -186,8 +194,11 @@ function draw(popUp::PopUpMenu, mousePos::Vector{Int32} )			# Int32 because that
 		draw(popUpText)
 		# ********************
 		#popUpSymbol = textStim(popUp.win, "▼",	[0, 0])
+		aaFilledRoundRectRGBA(popUp.win.renderer,
+						popUp.rightBottom[1] - 36, popUp.leftTop[2]+4, popUp.rightBottom[1]-4, popUp.rightBottom[2]-4,
+						8, 
+						64, 134, 237, 255)	
 		drawPopUpArrows(popUp)
-
 		# ********************
 	elseif popUp.state == "clicked"														# this enters the pop-up button selection loop
 #		println("I was clicked ", mousePos)

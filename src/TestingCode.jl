@@ -64,7 +64,7 @@ function DemoWindow()
 	println("\n New experiment info from dialog: \n\t", new_info)
 
 	#------------------------------------------
-	IDnumber = textInputDialog("Subject Info", "Enter the subject ID number", "000")
+	IDnumber = textInputDialog( "Enter the subject ID number", "000")
 	println("Id number received is", IDnumber)
 
 	myWin = window( [1000,1000], false)
