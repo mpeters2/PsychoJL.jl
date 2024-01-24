@@ -22,7 +22,7 @@ using JET
 
 	need to return struct full of values
 	change the spacing of the labels and widgets so that they are closer to eachother
-	have window size be based on number of widgets
+	have Window size be based on number of widgets
 	make pop-ups and text entries prettier
 =#
 
@@ -67,9 +67,9 @@ function DemoWindow()
 	IDnumber = textInputDialog( "Enter the subject ID number", "000")
 	println("Id number received is", IDnumber)
 
-	myWin = window( [1000,1000], false)
+	myWin = Window( [1000,1000], false)
 
-	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable window.  Scales contents when resized
+	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable Window.  Scales contents when resized
 	
 #	renderer = SDL_CreateRenderer(myWin.win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
 
@@ -154,7 +154,7 @@ function DemoWindow()
 							761,
 							13,
 							45, 97, 228, 255)	
-	buttonText = textStim(myWin,  
+	buttonText = TextStim(myWin,  
 							"OK", 
 							[734, 734], 
 							color = [255, 255, 255], 
@@ -178,18 +178,18 @@ end
 
 
 
-	psychoRect = rect(myWin, 100, 100, [400,400], lineColor = [255,0,0], fillColor = [255,128,128] )
+	psychoRect = Rect(myWin, 100, 100, [400,400], lineColor = [255,0,0], fillColor = [255,128,128] )
 
 
 	SDL_SetRenderDrawColor(myWin.renderer, 255, 255, 255, 255);	
 	#SDL_RenderDrawRect(renderer, mRect)
-	SDL_RenderDrawRect(myWin.renderer, Ref{SDL_Rect}(mRect))		# that addition mess lets me send the rect as a pointer to the rect
+	SDL_RenderDrawRect(myWin.renderer, Ref{SDL_Rect}(mRect))		# that addition mess lets me send the Rect as a pointer to the Rect
 	SDL_SetRenderDrawColor(myWin.renderer, 255, 255, 0, 255);		# <<< this becomes the next background color, during flip()
 	#SDL_RenderPresent(renderer);
 	flip(myWin)
 	SDL_SetRenderDrawColor(myWin.renderer, 255, 0, 0, 255);	
 	mRect = SDL_Rect(300, 300, 200, 200)					# wacky Julia struct constructor; x,y, widht, height
-	SDL_RenderDrawRect(myWin.renderer, Ref{SDL_Rect}(mRect))		# that addition mess lets me send the rect as a pointer to the rect
+	SDL_RenderDrawRect(myWin.renderer, Ref{SDL_Rect}(mRect))		# that addition mess lets me send the Rect as a pointer to the Rect
 #	SDL_RenderPresent(myWin.renderer)									# equivalent to win.Flip()
 #	SDL_PumpEvents()											# Must do this after every SDL_RenderPresent
 	println("start")
@@ -200,58 +200,58 @@ end
 	SDL_Delay(250)
 	draw(psychoRect)
 
-	newRect = rect(myWin, 100, 100, [200,200], lineColor = [255,0,0], fillColor = [255,128,128] )
+	newRect = Rect(myWin, 100, 100, [200,200], lineColor = [255,0,0], fillColor = [255,128,128] )
 	draw(newRect) 
 
-	hollowRect = rect(myWin, 500, 500, [750,750], lineColor = [128,128,128, 255], fillColor = [0,0,0,0] )
+	hollowRect = Rect(myWin, 500, 500, [750,750], lineColor = [128,128,128, 255], fillColor = [0,0,0,0] )
 	draw(hollowRect) 
-	hollowRect2 = rect(myWin, 500, 500, [250,250], lineColor = [128,128,128, 255], fillColor = [0,0,0,0] )
+	hollowRect2 = Rect(myWin, 500, 500, [250,250], lineColor = [128,128,128, 255], fillColor = [0,0,0,0] )
 	draw(hollowRect2) 
 #	sdl_ellipse(myWin, 500, 500, 75, 75)
 #	filledCircleRGBA(myWin.renderer, 550, 600, 50, 255,128, 128, 255)
 	#drawText(myWin, "does this work?")
 	myColor = [255, 255, 255, 255]
-	#myLine = line(myWin, [50, 150], [150, 1500], width = 1, lineColor = myColor )
-	myLine = line(myWin, [500, 875], [1000, 625], width = 1, lineColor = myColor )
+	#myLine = Line(myWin, [50, 150], [150, 1500], width = 1, lineColor = myColor )
+	myLine = Line(myWin, [500, 875], [1000, 625], width = 1, lineColor = myColor )
 	draw(myLine)
 
 
 	myColor2 = [0, 255, 0, 255]
-	myLine2 = line(myWin, [500, 750], [1000, 750], width = 2, lineColor = myColor2 )	# ::Vector{Int8}
+	myLine2 = Line(myWin, [500, 750], [1000, 750], width = 2, lineColor = myColor2 )	# ::Vector{Int8}
 	draw(myLine2)
 
 
 	myColor3 = [0, 0, 255, 255]
-	myLine3 = line(myWin, [500, 500], [1000, 1000], width = 3, lineColor = myColor3 )	
+	myLine3 = Line(myWin, [500, 500], [1000, 1000], width = 3, lineColor = myColor3 )	
 	draw(myLine3)
 
 	myColor4 = [255, 255, 0, 255]
-	myLine4 = line(myWin, [750, 500], [750, 1000], width = 4, lineColor = myColor4 )	
+	myLine4 = Line(myWin, [750, 500], [750, 1000], width = 4, lineColor = myColor4 )	
 	draw(myLine4)
 
 	myColor5 = [255, 0, 255, 255]
-	myLine5 = line(myWin, [500, 625], [1000, 875], width = 5, lineColor = myColor5 )	
+	myLine5 = Line(myWin, [500, 625], [1000, 875], width = 5, lineColor = myColor5 )	
 	draw(myLine5)
 
-	myText = textStim(myWin,  "Using a textStim", [300, 100], color = [255, 255, 128])
+	myText = TextStim(myWin,  "Using a TextStim", [300, 100], color = [255, 255, 128])
 	draw(myText)
 
-	myLine6 = line(myWin, [1300, 200], [1305, 1500], width = 1, lineColor = myColor )
+	myLine6 = Line(myWin, [1300, 200], [1305, 1500], width = 1, lineColor = myColor )
 	draw(myLine6)
 
-	myLine7 = line(myWin, [1320, 200], [1325, 1500], width = 5, lineColor = myColor5 )	
+	myLine7 = Line(myWin, [1320, 200], [1325, 1500], width = 5, lineColor = myColor5 )	
 	draw(myLine7)
 
-	myLine8 = line(myWin, [500, 675], [1000, 925], width = 1, lineColor = myColor5 )	
+	myLine8 = Line(myWin, [500, 675], [1000, 925], width = 1, lineColor = myColor5 )	
 	draw(myLine8)
 
-	myLine9 = line(myWin, [500, 725], [1000, 975], width = 2, lineColor = myColor5 )	
+	myLine9 = Line(myWin, [500, 725], [1000, 975], width = 2, lineColor = myColor5 )	
 	draw(myLine9)
 
-	horizLine = line(myWin, [500, 1100], [1000, 1100], width = 4, lineColor = [255, 0, 0, 255] )
+	horizLine = Line(myWin, [500, 1100], [1000, 1100], width = 4, lineColor = [255, 0, 0, 255] )
 	draw(horizLine)
 
-	vertLine = line(myWin, [1100, 500], [1100, 1000], width = 4, lineColor = [255, 0, 0, 255] )
+	vertLine = Line(myWin, [1100, 500], [1100, 1000], width = 4, lineColor = [255, 0, 0, 255] )
 	draw(vertLine)
 #=	Sans = TTF_OpenFont("Sans.ttf", 24);
 	White = SDL_Color(255, 255, 255, 255)
@@ -264,8 +264,8 @@ end
 					50)
 =#
 #	aaellipseRGBA(myWin.renderer, 650, 600, 50,50, 128,255, 128, 255)
-	myellipse1 = ellipse(myWin, [500, 1200], 120, 80, lineColor = [128, 255, 128, 255], fill = false)
-	myellipse2 = ellipse(myWin, [700, 600], 50,50, lineColor = [128, 128, 255, 255], fillColor = [255, 128, 128, 255], fill =true)
+	myellipse1 = Ellipse(myWin, [500, 1200], 120, 80, lineColor = [128, 255, 128, 255], fill = false)
+	myellipse2 = Ellipse(myWin, [700, 600], 50,50, lineColor = [128, 128, 255, 255], fillColor = [255, 128, 128, 255], fill =true)
 
 	draw(myellipse1)
 	draw(myellipse2)
@@ -299,10 +299,13 @@ end
 	SDL_RenderDrawLineF(myWin.renderer, 1630, 10, 1930, 310 )		# 45°
 	#------------------------------------------------------
 	imagePath = joinpath(dirname(pathof(SimpleDirectMediaLayer)), "..", "assets", "cat.png")
-	myImage = imageStim(myWin, imagePath)
+	myImage = ImageStim(myWin, imagePath)
 	draw(myImage, magnification = 10.0)
 
 	flip(myWin)
+	for i in 1:10
+		println(getKey(myWin) )
+	end
 end
 
 #@report_opt DemoWindow()
@@ -312,6 +315,7 @@ end
 #@report_opt DemoWindow()
 #@report_call DemoWindow()
 DemoWindow()
+
 
 
 SDL_Delay(2000)

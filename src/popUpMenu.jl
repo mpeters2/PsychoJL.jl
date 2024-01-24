@@ -11,7 +11,7 @@ mutable struct PopUpMenu
 	options::Array								# list of strings that can be selected
 	selectionIndex::Int64							# index option that is selected
 	valueText::String							# text of option that is selected
-	#textStim::TextStim						
+	#TextStim::TextStim						
 	#type::String								# default, other, custom.  default can be clicked with enter key
 	outlineColor::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
 	fillColor::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
@@ -99,7 +99,7 @@ mutable struct PopUpMenu
 		#-----
 		menuTexts::Vector{TextStim} = []
 		for i in eachindex(options)								# make text stimuli for each entry
-			popUpText = textStim(win, options[i],	[0, 0])
+			popUpText = TextStim(win, options[i],	[0, 0])
 			#popUpText.pos = [leftTop[1] + 4 , pos[2] ]
 			popUpText.pos = [leftTop[1] + 10 , rightBottom[2]-4 ]
 			popUpText.color = txtColor
@@ -141,12 +141,12 @@ function drawPopUpArrows(popUp::PopUpMenu)
 	cX = popUp.rightBottom[1] - 19
 	cY = popUp.pos[2]
 	for i in 1:(length(verts1)-1)
-		draw( line(popUp.win, [cX + verts1[i][1], cY + verts1[i][2]], [cX + verts1[i+1][1], cY + verts1[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
+		draw( Line(popUp.win, [cX + verts1[i][1], cY + verts1[i][2]], [cX + verts1[i+1][1], cY + verts1[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
 	end
 	#draw( line(popUp.win, [cX + verts1[3][1], cY + verts1[3][2]], [cX + verts1[1][1], cY + verts1[1][2]], width = 4, lineColor = [255,255,255,255] ) )	# [160,160,255,255]
 
 	for i in 1:(length(verts2)-1)
-		draw( line(popUp.win, [cX + verts2[i][1], cY + verts2[i][2]], [cX + verts2[i+1][1], cY + verts2[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
+		draw( Line(popUp.win, [cX + verts2[i][1], cY + verts2[i][2]], [cX + verts2[i+1][1], cY + verts2[i+1][2]], width = 4, lineColor = [255,255,255,255] ) )
 	end
 	#draw( line(popUp.win, [cX + verts2[3][1], cY + verts2[3][2]], [cX + verts2[1][1], cY + verts2[1][2]], width = 4, lineColor = [255,255,255,255] ) )	# [160,160,255,255]
 
@@ -188,12 +188,12 @@ function draw(popUp::PopUpMenu, mousePos::Vector{Int32} )			# Int32 because that
 		end
 		#---------
 		# draw text			...maybe move this inside the constructor
-		popUpText = popUp.menuTexts[popUp.selectionIndex] #				textStim(popUp.win, popUp.options[selection],	[0, 0])
+		popUpText = popUp.menuTexts[popUp.selectionIndex] #				TextStim(popUp.win, popUp.options[selection],	[0, 0])
 		#popUpText.pos = [popUp.leftTop[1] + 4 , popUp.pos[2] ]
 		popUpText.pos = [popUp.leftTop[1] + 10 , popUp.rightBottom[2]-4 ]
 		draw(popUpText)
 		# ********************
-		#popUpSymbol = textStim(popUp.win, "▼",	[0, 0])
+		#popUpSymbol = TextStim(popUp.win, "▼",	[0, 0])
 		aaFilledRoundRectRGBA(popUp.win.renderer,
 						popUp.rightBottom[1] - 36, popUp.leftTop[2]+4, popUp.rightBottom[1]-4, popUp.rightBottom[2]-4,
 						8, 

@@ -15,39 +15,40 @@ mutable struct ButtonStim
 	win::Window
 	pos::Vector{Int64}
 	size::Vector{Int64}
-	textStim::TextStim						
+	TextStim::TextStim						
 	type::String								# default, other, custom.  default can be clicked with enter key
 	outlineColor::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
 	fillColor::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
 												# other are the non-default buttons.
 												# custom uses the colors provided.
-end
-#----------
 
-function buttonStim(win::Window,
-				pos::Vector{Int64} = [10,10],
-				size::Vector{Int64} = [10,10],
-				textStim::TextStim = nothing,					
-				type::String = "other";
-				outlineColor::Vector{Int64} = fill(128, (4)),			# these will need to change to floats to handle Psychopy colors
-				fillColor::Vector{Int64} = fill(128, (4))			# these will need to change to floats to handle Psychopy colors
-				)
-	if textStim == nothing
-		error("Buttons require a textStim.")
+	#----------
+
+	function ButtonStim(win::Window,
+					pos::Vector{Int64} = [10,10],
+					size::Vector{Int64} = [10,10],
+					TextStim::TextStim = nothing,					
+					type::String = "other";
+					outlineColor::Vector{Int64} = fill(128, (4)),			# these will need to change to floats to handle Psychopy colors
+					fillColor::Vector{Int64} = fill(128, (4))			# these will need to change to floats to handle Psychopy colors
+					)
+		if TextStim == nothing
+			error("Buttons require a TextStim.")
+		end
+
+		TextStim.pos[1] = pos[1] * 2		# high dpi	
+		TextStim.pos[2] = pos[2] * 2		# high dpi
+		
+		new(win, 
+			pos,
+			size,
+			TextStim,
+			type,
+			outlineColor,
+			fillColor,						# these will need to change to floats to handle Psychopy colors
+			)
+
 	end
-	buttonStruct = ButtonStim(win, 
-				pos,
-				size,
-				textStim,
-				type,
-				outlineColor,
-				fillColor,						# these will need to change to floats to handle Psychopy colors
-				)
-
-	buttonStruct.textStim.pos[1] = pos[1] * 2		# high dpi	
-	buttonStruct.textStim.pos[2] = pos[2] * 2		# high dpi	
-			
-	return buttonStruct
 end
 
 #----------
@@ -87,12 +88,12 @@ function buttonDraw(but::ButtonStim)
 				#aaRoundRectRGBA(but.win.renderer,x1, y1, x2, y2, 17,
 				#						0, 0, 0, 255)	
 
-				but.textStim.color = [0, 0, 0]
-				but.textStim.fontSize = 24
-				but.textStim.horizAlignment = 0
-				but.textStim.vertAlignment = 0
-				#but.textStim.style = "bold"
-				draw(but.textStim)
+				but.TextStim.color = [0, 0, 0]
+				but.TextStim.fontSize = 24
+				but.TextStim.horizAlignment = 0
+				but.TextStim.vertAlignment = 0
+				#but.TextStim.style = "bold"
+				draw(but.TextStim)
 	elseif but.type == "default"												# blue highlighted button with white text
 				aaFilledRoundRectRGBA(but.win.renderer, x1-2, y1-2, x2+4, y2+4, 19,	# lightshadow first
 										238, 238, 238, 255)				
@@ -109,19 +110,19 @@ function buttonDraw(but::ButtonStim)
 										64, 135, 247, 255)				
 				aaRoundRectRGBA(but.win.renderer,x1 + 7, y1 +7, x2-7, y2-7, 12,
 										45, 97, 228, 255)	
-				but.textStim.color = [255, 255, 255]
-				but.textStim.fontSize = 24
-				but.textStim.horizAlignment = 0
-				but.textStim.vertAlignment = 0
-				#but.textStim.style = "bold"
-				draw(but.textStim)
+				but.TextStim.color = [255, 255, 255]
+				but.TextStim.fontSize = 24
+				but.TextStim.horizAlignment = 0
+				but.TextStim.vertAlignment = 0
+				#but.TextStim.style = "bold"
+				draw(but.TextStim)
 	elseif but.type == "custom"
 				aaFilledRoundRectRGBA(but.win.renderer, x1, y1, x2, y2, 16,
 										fillR, fillG, fillB, fillA)				
 			
 				aaRoundRectRGBA(but.win.renderer,x1, y1, x2, y2, 16,
 										outR, outG, outB, outA)	
-				draw(but.textStim)
+				draw(but.TextStim)
 	else
 		error("Invalid button type. Options are 'default', 'other', or 'custom'.")
 	end
@@ -162,12 +163,12 @@ function buttonDrawClicked(but::ButtonStim)
 				#aaRoundRectRGBA(but.win.renderer,x1, y1, x2, y2, 17,
 				#						0, 0, 0, 255)	
 
-				but.textStim.color = [0, 0, 0]
-				but.textStim.fontSize = 24
-				but.textStim.horizAlignment = 0
-				but.textStim.vertAlignment = 0
-				but.textStim.style = "bold"
-				draw(but.textStim)
+				but.TextStim.color = [0, 0, 0]
+				but.TextStim.fontSize = 24
+				but.TextStim.horizAlignment = 0
+				but.TextStim.vertAlignment = 0
+				but.TextStim.style = "bold"
+				draw(but.TextStim)
 	elseif but.type == "default"												# blue highlighted button with white text
 				aaFilledRoundRectRGBA(but.win.renderer, x1-2, y1-2, x2+4, y2+4, 20,	# lightshadow first
 										238, 238, 238, 255)				
@@ -184,19 +185,19 @@ function buttonDrawClicked(but::ButtonStim)
 										48, 113, 247, 227)				
 				aaRoundRectRGBA(but.win.renderer,x1 + 7, y1 +7, x2-7, y2-7, 13,
 										45, 97, 228, 255)	
-				but.textStim.color = [255, 255, 255]
-				but.textStim.fontSize = 24
-				but.textStim.horizAlignment = 0
-				but.textStim.vertAlignment = 0
-				but.textStim.style = "bold"
-				draw(but.textStim)
+				but.TextStim.color = [255, 255, 255]
+				but.TextStim.fontSize = 24
+				but.TextStim.horizAlignment = 0
+				but.TextStim.vertAlignment = 0
+				but.TextStim.style = "bold"
+				draw(but.TextStim)
 	elseif but.type == "custom"
 				aaFilledRoundRectRGBA(but.win.renderer, x1, y1, x2, y2, 17,
 										fillR, fillG, fillB, fillA)				
 			
 				aaRoundRectRGBA(but.win.renderer,x1, y1, x2, y2, 17,
 										outR, outG, outB, outA)	
-				draw(but.textStim)
+				draw(but.TextStim)
 	else
 		error("Invalid button type. Options are 'default', 'other', or 'custom'.")
 	end

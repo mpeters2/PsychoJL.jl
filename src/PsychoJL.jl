@@ -1,3 +1,4 @@
+" Module for writing Psychology Experiments inspired by Psychopy"
 module PsychoJL
 
 # need to make an alignment option for all widgets, like I did with textStim.
@@ -35,12 +36,12 @@ include( "SDL2_gfxPrimitives.jl" )
 include( "gui.jl" )
 include( "popUpMenu.jl" )
 
-export InitPsychoJL,  MakeInt8Color, wait
-export window, close, flip, Window, closeWinOnly, hideWindow
-export rect, sdl_ellipse, draw, line
-export textStim
+export InitPsychoJL,  MakeInt8Color, waitTime
+export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, dogcow
+export Rect, Ellipse, sdl_ellipse, Line
+export TextStim
 export waitKeys, getKey
-export imageStim
+export ImageStim
 export displayMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
 export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA
 export ButtonStim, ButtonMap, buttonDraw, buttonDrawClicked, buttonStim
@@ -55,19 +56,22 @@ export PopUpMenu, PopUpMap
 
 ToDo
 	Fix super hi-res scaling issue
-	add a gui
+	√	add a gui
+	Add multiple coordinate systems
 	√	TextStim STruct
 	√	GEt and show images
+	√	GEt and show images
 	√	waitKeys
+	√	draw for ellipse (not sdl_ellipse() )
 	√	draw for ellipse (not sdl_ellipse() )
 	change color methods so that they can handle 255, 1.0, and Psychopy
 	√	add line	
 	√	thickLineRGBA looks like shit. How can I anti-alias?
 	√	add fullscreen to window
-	show images
+	√	show images
 	add documenter
 	√	upload to github
-	Need Gui interface for getting information
+	√	Need Gui interface for getting information
 =#
 
 #----------

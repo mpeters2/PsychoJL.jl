@@ -4,12 +4,11 @@ authors = ["Matthew Steely Peterson"]
 version = "1.0.0-DEV"
 
 [deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
-Mousetrap = "5deeb4b9-6e04-4da7-8b7f-c77fb1eae65e"
 Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 QML = "2db162a6-7e43-52c3-8d84-290c1c42d82a"

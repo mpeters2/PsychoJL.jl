@@ -1,6 +1,6 @@
 # Translation of psycopy window file to Julia
 
-export InitPsychoJL, MakeInt8Color, wait
+export InitPsychoJL, MakeInt8Color, waitTime
 
 
 #using SimpleDirectMediaLayer
@@ -15,12 +15,8 @@ export InitPsychoJL, MakeInt8Color, wait
 
 Initializes PsychoJL module.
 
-inputs: None\n
-outputs: None
-
-Module for writing psychology and psychophysics experiments.
-
-Matt Peterson, 2023-2024
+**Inputs:** None\n
+**Outputs:** None
 """
 function InitPsychoJL()
 
@@ -31,6 +27,7 @@ function InitPsychoJL()
 
 end
 #-=================================================
+#=
 """
 	MakeInt8Color(r,g,b,a)
 
@@ -40,7 +37,7 @@ inputs: Four integers of any type
 outputs: UInt32
 
 """
-
+=#
 function MakeInt8Color(r,g,b,a)
 
 	#color::Vector{UInt8} = [mod(r, UInt8), mod(g, UInt8), mod(b, UInt8), mod(a, UInt8)]
@@ -64,17 +61,15 @@ println("color = ", color) #, "\n")
 end
 #-=================================================
 """
-	wait(win::Window, time::Float64)
+	waitTime(win::Window, time::Float64)
 
 Pauses for a set amount of time. Time scale (second or milliseconds) is set
 when making the Window.
 
-inputs: PsychoJL Window, 64-bit float\n
-outputs: Nothing
-
+**Inputs:** PsychoJL Window, 64-bit float\n
+**Outputs:** Nothing
 """
-
-function wait(win::Window, time::Float64)
+function waitTime(win::Window, time::Float64)
 	if win.timeScale == "milliseconds"
 		SDL_Delay(time)		
 	elseif win.timeScale == "seconds"

@@ -1,4 +1,4 @@
-# Might want to make a larger window for instructions, with buttons for OK and Back (incase they went too fast)
+# Might want to make a larger Window for instructions, with buttons for OK and Back (incase they went too fast)
 
 #using .Gtk: draw as GTKdraw
 #import Gtk			# this prevents namespace collisions between Gtk's draw() and PsychoJL's draw() functions
@@ -27,8 +27,19 @@ function fileOpenDlg()
 	Netlist_lines[1][begin:3]
 end
 #-=============================================
+#!["picture of a displayMessage dialog"](displayMessage.png)
+"""
+	displayMessage(myWin::Window, message::String)
+
+Displays a message along with an "OK" button.  Use before opening the main window
+or after closing the main window.  Useful for displaying errors or experiment completion messages.
+
+**Inputs:** PsychoJL Window, String\n
+**Outputs:** Nothing\n
+!["picture of a displayMessage dialog"](displayMessageSmall.png)
+"""
 function displayMessage(myWin::Window, message::String)
-	#Gtk.info_dialog(message)
+
 	SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_INFORMATION, "Alert", message, myWin.win)
 
 end
@@ -55,7 +66,7 @@ function showMessageBullshitExample(message::String)
     
     messageboxdata::SDL_MessageBoxData = [
 					SDL_MESSAGEBOX_INFORMATION, 				# .flags 
-					C_NULL, 									# .window 
+					C_NULL, 									# .Window 
 					"example message box",						# .title 
 					"select a button",							# .message 
 					SDL_arraysize(buttons), 					# .numbuttons 
@@ -103,7 +114,7 @@ function textInputDialog( promptString::String, defaultText::String)
 
 	InitPsychoJL()
 
-	dialogWin = window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
+	dialogWin = Window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
 
 	SDLwindow = dialogWin.win
 	renderer = dialogWin.renderer
@@ -127,7 +138,7 @@ function textInputDialog( promptString::String, defaultText::String)
 	#TTF_SetFontStyle(gFont, TTF_STYLE_ITALIC)
 	#Globals.promptTextTexture = loadFromRenderedText(Globals, promptString, textColor,  dialogWin.italicFont);		# inputText.c_str(), textColor );
 	#leftX = (SCREEN_WIDTH - Globals.promptTextTexture.mWidth)÷2					
-	promptText = textStim(dialogWin, promptString, [SCREEN_WIDTH, 20 ],		# you would think it would be SCREEN_WIDTH÷2, but hi-res messes it centers at SCREEN_WIDTH÷4.
+	promptText = TextStim(dialogWin, promptString, [SCREEN_WIDTH, 20 ],		# you would think it would be SCREEN_WIDTH÷2, but hi-res messes it centers at SCREEN_WIDTH÷4.
 							color = [0, 0, 0], 
 							fontSize = 24, 
 							horizAlignment = 0, 
@@ -146,16 +157,16 @@ function textInputDialog( promptString::String, defaultText::String)
 	#--------- Make buttons
 	buttonList = []
 	
-	OKtext = textStim(dialogWin, "OK",	[0, 0])
-	OKbutton = buttonStim(dialogWin,
+	OKtext = TextStim(dialogWin, "OK",	[0, 0])
+	OKbutton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH * 0.75), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
 				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
 				OKtext,					
 				"default")
 	push!(buttonList, ButtonMap(OKbutton, "OK-clicked") )
 
-	CancelText = textStim(dialogWin, "Cancel",	[0, 0])
-	CancelButton = buttonStim(dialogWin,
+	CancelText = TextStim(dialogWin, "Cancel",	[0, 0])
+	CancelButton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH * 0.25), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
 				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
 				CancelText,					
@@ -367,7 +378,7 @@ function textInputDialog( promptString::String, defaultText::String)
 				buttonDrawClicked(butMap.button)
 				butMap.state = "unclicked"
 				quit = true
-				buttonClicked = butMap.button.textStim.textMessage
+				buttonClicked = butMap.button.TextStim.textMessage
 			end
 		end
 
@@ -387,7 +398,7 @@ function textInputDialog( promptString::String, defaultText::String)
 
 	hideWindow(dialogWin)
 	SDL_RenderPresent( renderer );
-	#SDL_DestroyWindow(SDL_Window * window)
+	#SDL_DestroyWindow(SDL_Window * Window)
 	closeWinOnly(dialogWin)
 
 	return [buttonClicked, inputText]
@@ -422,7 +433,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 
 	InitPsychoJL()
 
-	dialogWin = window(title = dlgTitle, [SCREEN_WIDTH, SCREEN_HEIGHT], false)
+	dialogWin = Window(title = dlgTitle, [SCREEN_WIDTH, SCREEN_HEIGHT], false)
 
 	SDLwindow = dialogWin.win
 	renderer = dialogWin.renderer
@@ -444,7 +455,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 	#TTF_SetFontStyle(gFont, TTF_STYLE_ITALIC)
 	Globals.promptTextTexture = loadFromRenderedText(Globals, promptString, textColor,  dialogWin.italicFont);		# inputText.c_str(), textColor );
 	leftX = (SCREEN_WIDTH - Globals.promptTextTexture.mWidth)÷2					
-	promptText = textStim(dialogWin, promptString, [SCREEN_WIDTH, 20 ],		# you would think it would be SCREEN_WIDTH÷2, but hi-res messes it centers at SCREEN_WIDTH÷4.
+	promptText = TextStim(dialogWin, promptString, [SCREEN_WIDTH, 20 ],		# you would think it would be SCREEN_WIDTH÷2, but hi-res messes it centers at SCREEN_WIDTH÷4.
 							color = [0, 0, 0], 
 							fontSize = 24, 
 							horizAlignment = 0, 
@@ -456,16 +467,16 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 	#--------- Make buttons
 	buttonList = []
 	
-	OKtext = textStim(dialogWin, "OK",	[0, 0])
-	OKbutton = buttonStim(dialogWin,
+	OKtext = TextStim(dialogWin, "OK",	[0, 0])
+	OKbutton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH * 0.75), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
 				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
 				OKtext,					
 				"default")
 	push!(buttonList, ButtonMap(OKbutton, "OK-clicked") )
 
-	CancelText = textStim(dialogWin, "Cancel",	[0, 0])
-	CancelButton = buttonStim(dialogWin,
+	CancelText = TextStim(dialogWin, "Cancel",	[0, 0])
+	CancelButton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH * 0.25), round(Int64, SCREEN_HEIGHT * 0.75)],		# was 0.75, buthigh dpi shenanigans
 				[ round(Int64, SCREEN_WIDTH * 0.25), 68],
 				CancelText,					
@@ -686,7 +697,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 				buttonDrawClicked(butMap.button)
 				butMap.state = "unclicked"
 				quit = true
-				buttonClicked = butMap.button.textStim.textMessage
+				buttonClicked = butMap.button.TextStim.textMessage
 			end
 		end
 
@@ -706,7 +717,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 
 	hideWindow(dialogWin)
 	SDL_RenderPresent( renderer );
-	#SDL_DestroyWindow(SDL_Window * window)
+	#SDL_DestroyWindow(SDL_Window * Window)
 	closeWinOnly(dialogWin)
 
 	return [buttonClicked, inputText]
@@ -728,6 +739,26 @@ end
 	- would love a way to pick TTF from various operating systems
 
 =#
+"""
+	DlgFromDict(dlgDict::Dict)
+
+Displays a dialog box constructed from a dictionary.
+
+**Inputs:** Dictionary defining the input fields (keys) and pre-filled values (values) for the user dialog\n
+If the value is a string, that indicates a text input box with a default value.
+If the value is a tuple, it indicates that the widget should be pop-up menu populated by the choices listed in the tuple\n
+**Outputs:** Dictionary of responses.  Keys are from the input dictionary.
+
+Example:
+```julia
+	exp_info = Dict("subject_nr"=>0, "age"=>0, "handedness"=>("right","left","ambi"), 
+            "gender"=>("male","female","other","prefer not to say"))
+
+
+	new_info = DlgFromDict(exp_info)
+```
+![alternative text](dlgDictSmall.png)
+"""
 function DlgFromDict(dlgDict::Dict)
 	SCREEN_WIDTH = 350
 	SCREEN_HEIGHT = 150
@@ -756,7 +787,7 @@ function DlgFromDict(dlgDict::Dict)
 
 	InitPsychoJL()
 
-	dialogWin = window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
+	dialogWin = Window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
 
 	SDLwindow = dialogWin.win
 	renderer = dialogWin.renderer
@@ -784,7 +815,7 @@ function DlgFromDict(dlgDict::Dict)
 			widestKey = w[]
 		end
 		println(key,", ", w[])
-		label = textStim(dialogWin, key, [20, 10 + (i*(h[] + 10)) ],
+		label = TextStim(dialogWin, key, [20, 10 + (i*(h[] + 10)) ],
 							color = [0, 0, 0], 
 							fontSize = 24, 
 							horizAlignment = -1, 
@@ -801,8 +832,8 @@ function DlgFromDict(dlgDict::Dict)
 	#---------
 	# draw OK button
 	buttonList = []
-	OKtext = textStim(dialogWin, "OK",	[0, 0])
-	OKbutton = buttonStim(dialogWin,
+	OKtext = TextStim(dialogWin, "OK",	[0, 0])
+	OKbutton = ButtonStim(dialogWin,
 				#[ 20 + (widestKey),  10 + ((length(labels)+1) * (h[] +10)) ],		# was 0.75, buthigh dpi shenanigans
 				#[ widestKey, h[] + 10],
 				[ round(Int64, SCREEN_WIDTH *0.8), SCREEN_HEIGHT - (h[] ÷ 2)],
@@ -816,8 +847,8 @@ function DlgFromDict(dlgDict::Dict)
 	buttonDraw(OKbutton)
 	#---------
 	# draw Cancel button
-	Canceltext = textStim(dialogWin, "Cancel",	[0, 0])
-	CancelButton = buttonStim(dialogWin,
+	Canceltext = TextStim(dialogWin, "Cancel",	[0, 0])
+	CancelButton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH *0.5), SCREEN_HEIGHT - (h[] ÷ 2)],
 				[ (SCREEN_WIDTH ÷ 5) , h[] + 10],
 				Canceltext,					
@@ -1229,7 +1260,7 @@ function DlgFromDict(dlgDict::Dict)
 				buttonDrawClicked(butMap.button)
 				butMap.state = "unclicked"
 				quit = true
-				buttonClicked = butMap.button.textStim.textMessage
+				buttonClicked = butMap.button.TextStim.textMessage
 			end
 		end
 
@@ -1251,7 +1282,7 @@ function DlgFromDict(dlgDict::Dict)
 
 	hideWindow(dialogWin)
 	SDL_RenderPresent( renderer );
-	#SDL_DestroyWindow(SDL_Window * window)
+	#SDL_DestroyWindow(SDL_Window * Window)
 	closeWinOnly(dialogWin)
 
 	for inWidgit in inputWidgets
