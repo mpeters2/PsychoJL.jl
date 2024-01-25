@@ -86,7 +86,7 @@ mutable struct PopUpMenu
 				pos[2] + height ÷ 2]
 		=#	
 		fullLT = [leftTop[1], pos[2] - round(Int64, (height * halfCount)) - 4]		# pos[1] - maxWidth ÷ 2, 
-		fullRB = [rightBottom[1], pos[2] + round(Int64, (height * halfCount)) +4 ]	#pos[1] + maxWidth ÷ 2, 
+		fullRB = [rightBottom[1], pos[2] + round(Int64, (height * halfCount)) + 4 ]	#pos[1] + maxWidth ÷ 2, 
 						
 		#-----
 		txtColor = [0,0,0,255]
