@@ -39,7 +39,7 @@ makedocs(	modules = [PsychoJL],
 
 		)
 deploydocs(
-    repo    = "https://github.com/mpeters2/PsychoJL.jl.git",
+    repo    = "github.com/mpeters2/PsychoJL.jl.git",
     target  = "build",
     deps    = nothing,
     make    = nothing
