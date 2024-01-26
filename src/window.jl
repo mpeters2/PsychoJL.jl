@@ -39,6 +39,7 @@ Constructor for a Window object
   * fullScreen::Bool
   * timeScale::String .......*defaults is milliseconds.  Other option is seconds*
   * title::String
+  *  startTime::Float64 .......*global proximy for startTime() and stopTime()*
 
 **Methods:**
   * close()
@@ -60,6 +61,7 @@ mutable struct Window	#{T}
 	fullScreen::Bool
 	timeScale::String
 	title::String
+	startTime::Float64
 
 	#----------
 	function Window(size,			# window size; static array (stay away from tuples)

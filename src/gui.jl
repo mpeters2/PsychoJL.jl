@@ -787,7 +787,7 @@ function DlgFromDict(dlgDict::Dict)
 
 	InitPsychoJL()
 
-	dialogWin = Window(title = "", [SCREEN_WIDTH, SCREEN_HEIGHT], false)
+	dialogWin = Window([SCREEN_WIDTH, SCREEN_HEIGHT], false, title = "")
 
 	SDLwindow = dialogWin.win
 	renderer = dialogWin.renderer

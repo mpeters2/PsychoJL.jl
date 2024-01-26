@@ -303,9 +303,17 @@ end
 	draw(myImage, magnification = 10.0)
 
 	flip(myWin)
+
+	startTimer(myWin)
+	#theKey = getKey(myWin)
+	theKey = waitKeys(myWin, 5000)
+	timeTaken = stopTimer(myWin)
+	println("the key ", theKey," was pressed. It took ", timeTaken," milliseconds")
+	
 	for i in 1:10
 		println(getKey(myWin) )
 	end
+	
 end
 
 #@report_opt DemoWindow()

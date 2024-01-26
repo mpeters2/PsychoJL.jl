@@ -12,10 +12,12 @@ makedocs(	modules = [PsychoJL],
 				"Home" => "index.md",
 				"Initialization and Timing" => "InitializationAndTiming.md",
 				"Windows" => "Windows.md",
+				"GUI" => "GUI.md",
+				"Images" => "ImageStim.md",			
+				"Input Events" => "InputEvents.md",
 				"Shapes" => "Shapes.md",
 				"Text" => "TextStim.md",
-				"Input Events" => "InputEvents.md",
-				"GUI" => "GUI.md"
+				"Timing" => "Timings.md"
 				#=	"Getting Started" => "start.md",
 				"Concepts" => "concepts.md",
 				"Library" => Any[
@@ -44,6 +46,7 @@ deploydocs(
     deps    = nothing,
     make    = nothing
 )
+
 #=
 Order   = [:function, :type]
 

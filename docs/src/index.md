@@ -3,10 +3,13 @@
 # Introduction to PsychoJL
 
 PsychoJL is a module for writing psychology and psychophysics experiments.  The general framework 
-and style is inspired by PsychoPy, but there is no collaboration with the authors of PsychoPy.
+and style is inspired by PsychoPy, but there has been no collaboration with the authors of PsychoPy.
 
 Matt Peterson, 2023-2024
 
+## Manual Outline
+```@contents
+```
 ## Overview
 
 PsychoJL is a module for writing psychology experiments.  Typically, before a trial begins, 
@@ -89,6 +92,15 @@ end
 #------
 DemoWindow()
 ```
+## Missing Functionality
+mouse events
+timers (timing can be done by using Julia's time() function)
+circles
+shapeStim (arbitrary polygon)
+polygons (regular polygon)
+pie-wedges
+shapeStim
+
 
 ## Known issues
 
@@ -110,16 +122,16 @@ Currently, the origin is in the top-left and measurements are in pixels. Planned
 • Psychopy "height": origin is in the center of the screen.  Negative y-values are below the origin, and positive are above the origin.
 	On a 2560 x 1440, the top left coordinate would be (-0.89,+0.50), and the bottom right coordinate would be (+0.89,-0.50)
 
-### Coordinate system
+### Timescales
 The default timescale is `milliseconds`, but `seconds` is also an option.
 The timescale used for your experiment is set by passing `milliseconds` or `seconds` as one of the optional 
 parameters when creating a main window.
 
+### Monitors
+There are some issues that need to be worked out when using high-resolution displays suchs Retina displays.  Currently, fullscreen mode draws correctly, but when fullscreen = false, 
+the image is smaller than expected.
 ## Technology
 
 All graphics and input are handled by SDL.jl.  I translated parts of SDL2_gfxPrimitives from
 C to Julia, with some code replaced with more efficient algorithms.
 
-## Manual Outline
-```@contents
-```

@@ -3,6 +3,27 @@ export imageStim
 
 
 #-==================================================================
+"""
+	ImageStim()
+
+Constructor for an ImageStim object
+
+**Constructor inputs:**
+  * win::Window\n
+  * imageName::String.......*includes path*\n
+  * pos::Vector{Int64}\n
+
+**Optional constructor inputs:**
+  * image::Ptr{SDL_Texture}
+  * width::Int64
+  * height::Int64
+
+**Methods:**
+  * draw()
+
+**Notes:**
+width and height are automatically calculated during ImageStim construction.
+"""
 mutable struct ImageStim	#{T}
 	win::Window
 	imageName::String
@@ -49,6 +70,18 @@ mutable struct ImageStim	#{T}
 	end
 end
 #----------
+"""
+	draw(theImageStim::ImageStim; magnification::Float64)
+
+Draws an ImageStim to the back buffer.
+
+**Inputs: **
+ * theImageStim::ImageStim
+
+ **Optional Inputs: **
+ * magnification::Float64
+
+"""
 function draw(theImageStim::ImageStim; magnification::Float64)
 
 	if magnification == 0

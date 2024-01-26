@@ -35,6 +35,7 @@ include( "buttons.jl" )
 include( "SDL2_gfxPrimitives.jl" )
 include( "gui.jl" )
 include( "popUpMenu.jl" )
+include( "timings.jl" )
 
 export InitPsychoJL,  MakeInt8Color, waitTime
 export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, dogcow
@@ -46,6 +47,7 @@ export displayMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDia
 export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA
 export ButtonStim, ButtonMap, buttonDraw, buttonDrawClicked, buttonStim
 export PopUpMenu, PopUpMap
+export startTimer, stopTimer
 
 
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl

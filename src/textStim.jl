@@ -87,6 +87,16 @@ mutable struct TextStim	#{T}
 end
 
 #----------
+#----------
+"""
+	draw(text::TextStim)
+
+Draws an TextStim to the back buffer.
+
+**Inputs: **
+ * text::TextStim
+
+"""
 function draw(text::TextStim)
 	if length(text.color) == 4
 		color = SDL_Color(text.color[1], text.color[2] , text.color[3], text.color[4])
