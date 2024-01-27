@@ -3,6 +3,7 @@
 #using .Gtk: draw as GTKdraw
 #import Gtk			# this prevents namespace collisions between Gtk's draw() and PsychoJL's draw() functions
 include("guiUtilityFunctions.jl")
+using Dates
 
 export displayMessage, askQuestionDialog, fileOpenDlg,  inputDialog, textInputDialog, DlgFromDict
 
@@ -29,7 +30,7 @@ end
 #-=============================================
 #!["picture of a displayMessage dialog"](displayMessage.png)
 """
-	displayMessage(myWin::Window, message::String)
+	displayMessage( message::String)
 
 Displays a message along with an "OK" button.  Use before opening the main window
 or after closing the main window.  Useful for displaying errors or experiment completion messages.
@@ -38,9 +39,22 @@ or after closing the main window.  Useful for displaying errors or experiment co
 **Outputs:** Nothing\n
 !["picture of a displayMessage dialog"](displayMessageSmall.png)
 """
-function displayMessage(myWin::Window, message::String)
+function displayMessage( message::String)
 
-	SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_INFORMATION, "Alert", message, myWin.win)
+	SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_INFORMATION, "Alert", message, C_NULL)
+	# debounces by waiting for an SDL_KEYUP event
+	SDLevent = Ref{SDL_Event}()
+	done = false
+	while done == false
+		while Bool(SDL_PollEvent(SDLevent))
+			event_ref = SDLevent
+			evt = event_ref[]
+			evt_ty = evt.type
+			if( evt_ty == SDL_KEYUP )
+				done = true
+			end
+		end
+	end
 
 end
 
@@ -760,6 +774,8 @@ Example:
 ![alternative text](dlgDictSmall.png)
 """
 function DlgFromDict(dlgDict::Dict)
+	DEBUG = true
+	
 	SCREEN_WIDTH = 350
 	SCREEN_HEIGHT = 150
 
@@ -785,7 +801,7 @@ function DlgFromDict(dlgDict::Dict)
 	
 	textColor =  SDL_Color(0, 0, 0, 0xFF)						#Set text color as black
 
-	InitPsychoJL()
+#	InitPsychoJL()												# Is it bad form to call this here?
 
 	dialogWin = Window([SCREEN_WIDTH, SCREEN_HEIGHT], false, title = "")
 
@@ -904,10 +920,27 @@ function DlgFromDict(dlgDict::Dict)
 	#	drawInputBox(renderer, myInputBox)
 	bend = 0
 
+	# wait for KeyUp first so that we can debounce
+	# but I don't think it will work for this, as dialogWin is not the main window!
+	# therefore, it contains a different .firstKey!
+	#=
+	done = false
+	while done == false || dialogWin.firstKey == false
+		while Bool(SDL_PollEvent(SDLevent))
+			event_ref = SDLevent
+			evt = event_ref[]
+			evt_ty = evt.type
+			if( evt_ty == SDL_KEYUP )
+				done = true
+			end
+		end
+	end
+	=#
+#	win.firstKey = true							# couldn't find a way to inject a Key_UP event in the queue, so did this instead
+	SDL_StartTextInput()
+
 	while( !quit )
-
 		renderText::Bool = false;					# The rerender text flag
-
 		while Bool(SDL_PollEvent(SDLevent))			# Handle events on queue
 			event_ref = SDLevent
 			evt = event_ref[]
@@ -919,6 +952,7 @@ function DlgFromDict(dlgDict::Dict)
 			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
 			if( evt_ty == SDL_KEYDOWN )							#Special key input
 				println("evt_key.keysym.sym = ", evt_key.keysym.sym )
+				println("....", evt_ty," ,",typeof(inputWidgets[focusedInput]))
 				#Handle backspace
 				if typeof(inputWidgets[focusedInput]) == InputBox
 					if( evt_key.keysym.sym == SDLK_BACKSPACE && length(inputWidgets[focusedInput].valueText) > 0 ) 
@@ -966,6 +1000,7 @@ function DlgFromDict(dlgDict::Dict)
 				inputWidgets[focusedInput].valueText = leftString * textTemp * last(inputWidgets[focusedInput].valueText, cursorLocation)
 				#inputText = inputText * textTemp				# * is Julila concatenate
 				renderText = true;
+				if DEBUG; println("...",inputWidgets[focusedInput].valueText); end
 			#---------------------------------------------------------------------------------------
 			#=	make list of clicks
 				determine who gets the click
@@ -1043,9 +1078,11 @@ function DlgFromDict(dlgDict::Dict)
 						end
 					end
 
-
+				else
+					println(".......", evt_ty," ,",typeof(inputWidgets[focusedInput]))
 
 				end
+
 			end
 #=			
 			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )

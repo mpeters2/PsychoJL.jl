@@ -52,6 +52,74 @@ stim = TextStim(win,
                 color=(255, 0, 0))
 stim.textMessage = "Goodbye, world!"
 ```
+## Performance Tips
+Julia can be many orders of magnitude faster than Python. My biggest performance tip is, despite their similarities,
+do not write Julia programs like you would write a Python program.
+
+##### Global Variables
+For example, although Julia can use global variables, the use of global variables (global constants are OK)
+[prevents the optimizing compiler from optimizing](https://docs.julialang.org/en/v1/manual/performance-tips/).
+Instead, pass around structs containing what would have been written as global variables in a Python program.
+The VisualSearchMain.jl example experiment shows this in action. It uses a struct called ExperimentalDesign.
+Although the struct definition is in the global scope, an instance of this structure is created in the 
+function `makeExperimentalDesign()` and passed around from function-to-function.
+
+```julia
+mutable struct ExperimentDesign	 	# we'll pass this around instead of globals
+	numTrials::Int64
+	trialSS::Vector{Int64}		  	# this holds the combination of SetSize control 
+	trialTP::Vector{Int64}		  	# Target Presence
+	randomOrder::Vector{Int64}	  	# this will hold the random order in which the trials will be displayed.
+end
+```
+PsychoJL also makes use of this through the Window instance you create.  You may have noticed that most PsychoJL functions
+require a window to be passed as one of their parameters.  For example, `startTimer()` and `stopTimer()` require a Window to be 
+passed as one of their arguments.
+What in the world does timing have to do with a graphical window?  Nothing. However, PsychoJL uses it as a struct that can
+hold what would have otherwise been a global variable in another language.  Calling `startTimer()` causes it to store the 
+starting time in the Window you passsed to it.  Likewise, `stopTimer()` uses the information stored in the Window structure
+to calculate the elapsed time.
+
+##### Variable Typing
+
+Like Python, Julia can infer variables types. However, Julia can be faster when it does not need to infer types.  For example,
+the parameter for this function is perfectly legal (from a syntactic point of view):
+
+```julia
+function fancyMath(myArray)
+	answer = doSomeStuff()
+	return answer
+end
+```
+But, is even better, because it explicitely states the parameter's type:
+
+```julia
+function fancyMath(myArray::Vector{Float64})
+	answer = doSomeStuff()
+	return answer
+end
+```
+
+As you might have noticed by the documentation, PsychoJL is strongly typed.  Future versions, through
+multiple-dispatch (i.e. overloading) will be less strict with their types. For example, for the `startPoint`
+and `endPoint`, `Line()` requires a vector of two integers.  In the future, it will allow vectors of floats.
+
+When dividing variables that should remain integers, Julia's integer division operand `÷` (not `/`!) is 
+extremely useful. Dividing integers using the standard division operand `\` can return a float. For example:
+
+```julia
+julia> x = 255 ÷ 2
+127
+```
+vs
+```julia
+julia> x = 255 / 2
+127.5
+```
+Integer division truncates.  In other situations `round(Int64, x)` might make more sense.
+
+###### Integer Division
+
 ## Usage Rules
 
 1. The function `InitPsychoJL()` just be called before any PsychoJL functions are called.

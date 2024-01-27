@@ -73,7 +73,9 @@ Waits until a key is pressed.
 function getKey(win::Window)
 	#Enable text input
 	SDL_StartTextInput();
+	keypressed = ""									# ensures that keypressed is not local the while loop
 
+	#win.firstKey = false							# couldn't find a way to inject a Key_UP event in the queue, so did this instead
 	done = false
 	while done == false
 		while Bool(SDL_PollEvent(win.event))
@@ -82,26 +84,32 @@ function getKey(win::Window)
 			evt_ty = evt.type
 			evt_text = evt.text
 			if( evt_ty == SDL_TEXTINPUT )
-				textTemp = NTupleToString(evt_text.text)
-				if textTemp != nothing
+				keypressed = NTupleToString(evt_text.text)
+				if keypressed != nothing
 					SDL_StopTextInput()
-					if textTemp == " "				# space
-						return "space"
-					elseif	textTemp == "	"		# tab
-						return "tab"
-					else
-						return textTemp
+					if keypressed == " "				# space
+						keypressed = "space"
+					elseif	keypressed == "	"		# tab
+						keypressed = "tab"
 					end
+					done = true
 				end
 			end
-			#=
-			if evt_ty == SDL_KEYDOWN
-				println( "Key press detected (", time() - start,")\n" );
-			elseif evt_ty == SDL_KEYUP
-				println( "Key release detected\n" );
+		end
+	end
+	# wait for KeyUp first so that we can debounce
+	done = false
+	while done == false
+		while Bool(SDL_PollEvent(win.event))
+			event_ref = win.event
+			evt = event_ref[]
+			evt_ty = evt.type
+			if( evt_ty == SDL_KEYUP )
+				done = true
 			end
-			=#
 		end
 	end
 	SDL_StopTextInput()
+	return keypressed
+
 end

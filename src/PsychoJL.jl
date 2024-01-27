@@ -37,8 +37,9 @@ include( "gui.jl" )
 include( "popUpMenu.jl" )
 include( "timings.jl" )
 
-export InitPsychoJL,  MakeInt8Color, waitTime
-export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, dogcow
+export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec
+export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
+export mouseVisible
 export Rect, Ellipse, sdl_ellipse, Line
 export TextStim
 export waitKeys, getKey

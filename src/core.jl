@@ -1,6 +1,6 @@
 # Translation of psycopy window file to Julia
 
-export InitPsychoJL, MakeInt8Color, waitTime
+export InitPsychoJL, MakeInt8Color, waitTime, waitTimeMsec
 
 
 #using SimpleDirectMediaLayer
@@ -76,7 +76,19 @@ function waitTime(win::Window, time::Float64)
 		SDL_Delay(time * 1000)	
 	end
 end
+#-=================================================
+"""
+	waitTimeMsec(time::Float64)
 
+Pauses for a set amount of time. Time scale is in milliseconds, and does not 
+require a window to be passed to it..
+
+**Inputs:** 64-bit float\n
+**Outputs:** Nothing
+"""
+function waitTimeMsec(time::Float64)
+	SDL_Delay(time)		
+end
 #-=================================================
 
 #-=========

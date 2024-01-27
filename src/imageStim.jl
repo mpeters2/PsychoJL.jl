@@ -75,10 +75,10 @@ end
 
 Draws an ImageStim to the back buffer.
 
-**Inputs: **
+**Inputs:**
  * theImageStim::ImageStim
 
- **Optional Inputs: **
+ **Optional Inputs:**
  * magnification::Float64
 
 """

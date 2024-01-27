@@ -14,6 +14,7 @@ using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 using SDL2_ttf_jll
 using SDL2_gfx_jll
+using Printf
 
 const setSizes = [8, 16, 24] 				# global constants are kosher in Julia,  but not global variables.
 const targetPresences = 2
@@ -32,22 +33,111 @@ function main()
 	
 
 	InitPsychoJL()
-	subjInfo, subjID = getSubjectInfo()
-	myWin = Window( [1000,1000], true)
-	
+	subjID = getSubjectInfo()
+	subjFile = openDataFile(subjID)
+
+
+	myWin = Window( [2560,1440], true)			# 5120 × 2880, or 2560 x 1440	[1000,1000]
+	mouseVisible(false)
 	exp = makeExperimentalDesign(setSizes, targetPresences, repetitions)		# returns an ExperimentDesign struct
 
+	showInstructions(myWin)
 	#practice
-	for t in 1:10
-		doATrial(myWin, t, exp, false)
+	for t in 1:3
+		doATrial(myWin, t, exp, subjFile, false )
 	end
-	println("done!")
-	SDL_Delay(2000)
-	exit()
+
+	for t in 1:10
+		doATrial(myWin, t, exp, subjFile, true )
+	end	
+	shutDown(myWin, subjFile)
+	#exit()
+end
+#-============================================================================
+function showInstructions(win::Window, )
+	
+	x2 = win.pos[1]
+	y2 = win.pos[1]
+	x,y = getPos(win)
+	posMes = @sprintf("(%d, %d) (%d, %d)", x,y,x2,y2)
+	posText = TextStim(win, posMes, [100, 100 ])
+	posText.horizAlignment = -1
+	draw(posText)
+
+	w2 = Ref{Cint}()
+	h2 = Ref{Cint}()
+	SDL_GetWindowSize(win.win, w2, h2)
+	posText.textMessage = @sprintf("SDL_GetWindowSize (%d, %d)", w2[],h2[])
+	posText.pos = [100, 150 ]
+	draw(posText)
+
+	w3 = Ref{Cint}()
+	h3 = Ref{Cint}()
+	SDL_GL_GetDrawableSize(win.win, w3, h3)
+	posText.textMessage = @sprintf("SDL_GL_GetDrawableSize (%d, %d)", w3[],h3[])
+	posText.pos = [100, 200 ]
+	draw(posText)
+
+	line1 = Line(win, [x, 0], [x, y*2], width = 1, lineColor = [255,0,0,255] )
+	line2 = Line(win, [0, y], [x* 2, y], width = 1, lineColor = [0,0,255,255] )
+	draw(line1)
+	draw(line2)
+
+	#x = win.pos[1] ÷ 2						# divide by two for retina scaling issue
+	#y = win.pos[2]	÷ 2
+	print("x and y = ", x,", ",y)
+
+	message1 = "Press the '/' key if a T is present."
+	TextStim1 = TextStim(win, message1, [x, y - 50 ])
+	TextStim1.color = [255, 255, 255]
+	TextStim1.scale = 1.5
+	TextStim1.horizAlignment = 0					# center aligned
+	draw(TextStim1)
+
+	message2 = "Press the 'z' key if the target T is absent."
+	TextStim2 = TextStim(win, message2, [x, y + 50 ])
+	TextStim2.color = [255, 255, 255]
+	TextStim2.scale = 1.5
+	TextStim2.horizAlignment = 0					# center aligned
+	draw(TextStim2)
+
+	message3 = "Press the space bar when you are ready to continue."
+	TextStim3 = TextStim(win, message3, [x, y + 250 ])
+	TextStim3.color = [255, 255, 0]
+	draw(TextStim3)
+   
+	flip(win)
+	getKey(win)
+end
+
+#-============================================================================
+function shutDown(win::Window, subjFile::IOStream)
+	close(subjFile)
+	mouseVisible(true)
+	setFullScreen(win, false)
+	hideWindow(win)
+	displayMessage( "Thank-you for particpating")
+	closeAndQuitPsychoJL(win)
+	println("post closeAndQuitPsychoJL")
+end
+#-============================================================================
+function openDataFile(subjID::String)
+	fileName = "subj" * subjID * ".txt"
+	println(pwd())
+	println(fileName)
+	while isfile(fileName) == true
+		message = fileName * " already exists!"
+		displayMessage( message)
+		subjID = getSubjectInfo()
+		fileName = "subj" * subjID * ".txt"
+	end
+	f = open(fileName, "a")						# append, so that we can stream the data
+	write(f,"TrialNum\tOrder\tTargetPresent\tSetSize\tRT\tCorrect\tkeypressed\n")
+	return f
 end
 #-============================================================================
 # We'll make the target a left or right rotated T among rotated Ls
-function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, realOrPractice::Bool = true)
+function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, subjFile::IOStream, realOrPractice::Bool = true)
 
 	theTrial = trialInfo.randomOrder[trialNum]		# get our randomized trial number
 
@@ -74,10 +164,19 @@ function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, rea
 
 	# (4) Premake the stimuli
 	stimDrawList::Vector{TextStim} = []
-
+	_, gridSize = getSize(win)							# square display area, so grabbing window's height
+	gridSize *= 0.9										# we'll use 90% of the area
+	gridSize *= 0.1										# and divide it into 10
+	xScootch, _ = win.pos								# find the middle of the window...
+	xScootch = round(Int64, xScootch /2)				# ... and take half that.  We'll scootch the stimuli over so that they are centered.
 	for i in eachindex(stimList)
-		x = 50+((locations[i]%10)*100)						# 1000 x 1000, steps of 100
-		y = 50+(floor(Int64, locations[i]/10)*100)						# 1000 x 1000, steps of 100
+		#x = 50+((locations[i]%10)*100)						# 1000 x 1000, steps of 100
+		#y = 50+(floor(Int64, locations[i]/10)*100)						# 1000 x 1000, steps of 100
+		x = (gridSize÷2)+((locations[i]%10)*gridSize)						# 1000 x 1000, steps of 100
+		y = (gridSize÷2)+(floor(Int64, locations[i]/10)*gridSize)						# 1000 x 1000, steps of 100
+		x += xScootch
+		x = round(Int64, x)
+		y = round(Int64, y)
 		if stimList[i] == -1							# target
 			ori = rand(1:2)
 			if ori == 1
@@ -87,23 +186,41 @@ function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, rea
 			end
 			tempStim = TextStim(win,  "T", [x, y], color = [255,255,0], fontSize = 24, orientation = ori)
 			push!(stimDrawList, tempStim)				# append it to stimDrawList
-			println("target present",  theTrial)
 		else											# else it is a distractor
 			tempStim = TextStim(win,  "L", [x, y], color = [255,255,255], fontSize = 24, orientation = floor(Int, stimList[i] * 90) )
 			push!(stimDrawList, tempStim)				# append it to stimDrawList
 		end
 	end
-	
-
+	if stimList[1] == -1
+		println("target present\n",  theTrial)
+	else
+		println("target absent\n",  theTrial)
+	end
 	for s in stimDrawList
 		draw(s)
 	end
 	flip(win)
-	SDL_Delay(2285)
-	flip(win)
-	SDL_Delay(15)	
+	startTimer(win)
 
-	print("boo")
+	keypressed = getKey(win)
+	RT = stopTimer(win)
+
+	# Grade Keypress
+	accuracy = 0
+	if keypressed == "z" && trialInfo.trialTP[theTrial] == 0
+		accuracy = 1
+	elseif keypressed == "/" && trialInfo.trialTP[theTrial] == 1
+		accuracy = 1
+	elseif keypressed == "7"								# secret abort key
+		shutDown(win, subjFile)
+	end
+	#------
+	if realOrPractice == true					# do not save practice data
+		buf = @sprintf("%d\t%d\t%d\t", trialNum,  theTrial, trialInfo.trialTP[theTrial])
+		buf = buf * @sprintf("%d\t%4.1f\t%d\t%s\n", trialInfo.trialSS[theTrial], RT, accuracy, keypressed)
+
+		write(subjFile, buf)
+	end
 end
 #-============================================================================
 # Algorithmically make the control variables for the experiment
@@ -133,7 +250,7 @@ function makeExperimentalDesign(SS, TP, Reps)
 	return designInfo
 end
 #-===============================================================
-function getSubjectInfo()
+function OldgetSubjectInfo()
 
 	
 	#subjInfo = {"Particpant":""}
@@ -144,13 +261,48 @@ function getSubjectInfo()
 	else
 		println("User Cancelled")
 		displayMessage("User Cancelled")
-		waitTime(3000)
+		waitTimeMsec(3000)
+		exit()
 	end
-	#subjID =  subjInfo.get("Particpant","none")
 	subjID =  dictDlg[2]["Particpant"]
+	subjID = String(strip(subjID, ' '))						# sometimes returns an extra space
 	println("subject name = ", subjID,"\n")
 
-	return subjInfo, subjID
+	return subjID
 end
 #-============================================================================
+function getSubjectInfo()	
+	
+	done = false
+	subjID = ""									# ensures that subjID is not local to the while loop
+	
+	while done == false
+		subjInfo= Dict("Particpant" => "")
+		dictDlg = DlgFromDict(subjInfo)
+		if dictDlg[1] == "OK"
+			println(subjInfo)
+		else
+			print("User Cancelled")
+			displayMessage("User Cancelled")
+			waitTimeMsec(3000)
+			exit()
+		end
+		subjID =  dictDlg[2]["Particpant"]
+		subjID = String(strip(subjID, ' '))						# sometimes returns an extra space
+
+		println("subjID = ", subjID,"\n")
+	
+		# check if the filename is valid (length <= 8 & no special char)
+		fileName = "subj" * subjID * ".txt"
+		if isfile(fileName) == true
+			message = fileName * " already exists!"
+			displayMessage( message)
+			#subjID = getSubjectInfo()
+			#fileName = "subj" * subjID * ".txt"
+		else
+			done = true
+		end
+	end
+	return subjID
+end
 main()

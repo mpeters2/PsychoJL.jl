@@ -63,9 +63,10 @@ function DemoWindow()
 
 	println("\n New experiment info from dialog: \n\t", new_info)
 
+	displayMessage( "Something happened")
 	#------------------------------------------
-	IDnumber = textInputDialog( "Enter the subject ID number", "000")
-	println("Id number received is", IDnumber)
+	#IDnumber = textInputDialog( "Enter the subject ID number", "000")
+	#println("Id number received is", IDnumber)
 
 	myWin = Window( [1000,1000], false)
 
@@ -77,7 +78,7 @@ function DemoWindow()
 	mRect = SDL_Rect(250, 150, 200, 200)					# wacky Julia struct constructor; x,y, widht, height
 
 
-	displayMessage(myWin,  "Something happened")
+
 
 
 
@@ -313,7 +314,7 @@ end
 	for i in 1:10
 		println(getKey(myWin) )
 	end
-	
+	closeAndQuitPsychoJL(myWin)
 end
 
 #@report_opt DemoWindow()
@@ -329,7 +330,7 @@ DemoWindow()
 SDL_Delay(2000)
 
 
-exit()
+#exit()
 
 
 

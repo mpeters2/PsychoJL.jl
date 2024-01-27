@@ -1,6 +1,7 @@
 # Translation of psycopy window file to Julia
 
-export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, dogcow
+export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
+export mouseVisible
 #
 
 
@@ -28,7 +29,7 @@ Constructor for a Window object
 **Full list of fields**
   * win::Ptr{SDL_Window}
   * size::MVector{2, Int64}		
-  * pos::MVector{2, Float64}	......*position*
+  * pos::MVector{2, Int64}	......*position*
   * color::MVector{3, Int64}			
   * colorSpace::String				
   * renderer::Ptr{SDL_Renderer}
@@ -42,15 +43,19 @@ Constructor for a Window object
   *  startTime::Float64 .......*global proximy for startTime() and stopTime()*
 
 **Methods:**
-  * close()
+  * closeAndQuitPsychoJL()
   * closeWinOnly()
   * flip()
+  * getPos()
+  * getSize()
   * hideWindow()
+  * mouseVisible()
+  * setFullScreen()
 """
 mutable struct Window	#{T}
 	win::Ptr{SDL_Window}
 	size::MVector{2, Int64}		# window size; static array (stay away from tuples)
-	pos::MVector{2, Float64}		# position
+	pos::MVector{2, Int64}		# position
 	color::MVector{3, Int64}			# these will be Psychopy colors
 	colorSpace::String				# might need to revist for colors.jl
 	renderer::Ptr{SDL_Renderer}
@@ -62,7 +67,7 @@ mutable struct Window	#{T}
 	timeScale::String
 	title::String
 	startTime::Float64
-
+	firstKey::Bool				# used for debouncing first keypress
 	#----------
 	function Window(size,			# window size; static array (stay away from tuples)
 					fullScreen = false;
@@ -81,6 +86,11 @@ mutable struct Window	#{T}
 			timeScale = "milliseconds"
 		end
 
+		displayInfo = Ref{SDL_DisplayMode}()
+		SDL_GetCurrentDisplayMode(0, displayInfo)
+		screenWidth = displayInfo[].w
+		screenHeight = displayInfo[].h
+		pos = [screenWidth ÷ 2, screenHeight ÷ 2]
 
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 		renderer = SDL_CreateRenderer(winPtr, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
@@ -135,7 +145,37 @@ mutable struct Window	#{T}
 		end
 		SDL_PumpEvents()					# this erases whatever random stuff was in the backbuffer
 		SDL_RenderClear(renderer)			# <<< Had to do this to clear out the noise.
+		#---------
+		# We're using this to partially clear the keyboard event queue to help the debouncing routines
+		#SDLevent = Ref{SDL_Event}()									#Event handler
+		#event_ref = SDLevent
+		#evt = event_ref[]
+		#evt_ty = evt.type
+		#evt_ty = SDL_KEYDOWN
+		# ERROR: type SDL_Event has no field type
+		# pEvent := &sdl.UserEvent{sdl.USEREVENT, sdl.GetTicks(), id, 1331, nil, nil}
+		# myEvent := &sdl.UserEvent{sdl.SDL_KeyboardEvent, sdl.GetTicks(), id, 1331, nil, nil}
+		#=
+		SDL_Event ev;
+		ev.type = userType;
+
+		ev.user.code = someEvtCode;
+		ev.user.data1 = &someData;
+		ev.user.data2 = 0;
+
+		SDL_PushEvent(&ev);
+		-------------
+		SDLevent.type = 
 		
+		event_ref = event
+		evt = event_ref[]
+		evt_ty = evt.type
+		evt.type = SDL_KEYDOWN
+		event[].type = SDL_KEYDOWN
+		=#
+#		SDL_PushEvent(event)
+		firstKey = true
+		#---------
 		new(winPtr, 
 			size, 
 			pos, 
@@ -148,7 +188,8 @@ mutable struct Window	#{T}
 			event,
 			fullScreen,
 			timeScale,
-			title
+			title,
+			firstKey
 			)
 
 
@@ -162,10 +203,14 @@ Attempts to close a PsychoJL Window and quit SDL.
 """
 function closeAndQuitPsychoJL(win::Window)
    # SDL_DestroyTexture(tex)			# this nees to get more complicated, where it loops through a list of textures
-    SDL_DestroyRenderer(myWin.renderer)		# this nees to get more complicated, where it loops through a list of renderers
-	SDL_DestroyWindow(myWin.win)
+ 	println("pre SDL_SetWindowFullscreen")
+	exit()
+    SDL_SetWindowFullscreen(win.win, SDL_FALSE)
+	SDL_DestroyRenderer(win.renderer)		# this nees to get more complicated, where it loops through a list of renderers
+	SDL_DestroyWindow(win.win)
 	println("pre SDL_Quit")
-	SDL_Quit()
+	#SDL_Quit()
+	exit()
 end
 #----------
 """
@@ -200,7 +245,71 @@ Attempts to hide a PsychoJL Window.
 function hideWindow(win::Window)
 	SDL_HideWindow(win.win)
 end
+#----------
+"""
+	getPos(win::Window)
 
+Returns the center of the window. This, as well as the dimensions, can chage when going to full screen
+"""
+function getPos(win::Window)
+#=
+	displayInfo = Ref{SDL_DisplayMode}()
+	SDL_GetCurrentDisplayMode(0, displayInfo)
+	screenWidth = displayInfo[].w
+	screenHeight = displayInfo[].h
+=#
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	SDL_GL_GetDrawableSize(win.win, w, h)
+	screenWidth = w[]
+	screenHeight = h[]
+	win.pos = [screenWidth ÷ 2, screenHeight ÷ 2]			# integer division
+	return win.pos
+end
+#----------
+"""
+	getSize(win::Window)
+
+Returns the width and height of the window. Dimensions can chage when going to full screen.
+"""
+function getSize(win::Window)
+
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	SDL_GL_GetDrawableSize(win.win, w, h)
+	screenWidth = w[]
+	screenHeight = h[]
+	win.size = [screenWidth, screenHeight ]
+	return win.size
+end
+#----------
+"""
+	setFullScreen(win::Window, mode::Bool)
+
+Allows you to flip between windowed and full-screen mode.
+"""
+function setFullScreen(win::Window, mode::Bool)
+
+	if mode == true
+		SDL_SetWindowFullscreen(win.win, SDL_WINDOW_FULLSCREEN)
+	else
+		SDL_SetWindowFullscreen(win.win, SDL_WINDOW_FULLSCREEN_DESKTOP)
+	end
+end
+#----------
+"""
+	mouseVisible(mode::Bool)
+
+Hides or shows the cursor
+"""
+function mouseVisible(visibility::Bool)
+
+	if visibility == true
+		SDL_ShowCursor(SDL_ENABLE)
+	else
+		SDL_ShowCursor(SDL_DISABLE)
+	end
+end
 
 #-===============================================
 # /System/Library/Fonts

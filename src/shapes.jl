@@ -51,6 +51,14 @@ mutable struct Line
 			)
 	# might want to add length and orientation
 	#	Int8Color = 
+		if length(endPoint) != 2
+			message = "endPoint needs two coordinates, got " * String(length(endPoint)) * " instead."
+			error(message)
+		end
+		if length(startPoint) != 2
+			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
+			error(message)
+		end		
 		new(win, 
 			startPoint,
 			endPoint,

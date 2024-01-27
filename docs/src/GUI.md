@@ -1,5 +1,5 @@
 ```@docs
-displayMessage(myWin::Window, message::String)
+displayMessage( message::String)
 DlgFromDict(dlgDict::Dict)
 ```
 
