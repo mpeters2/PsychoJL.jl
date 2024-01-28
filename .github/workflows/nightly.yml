@@ -1,4 +1,4 @@
-name: CI
+name: Nightly
 on:
   push:
     branches:
@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.9'
+          - 'nightly'
         os:
           - ubuntu-latest
         arch:
