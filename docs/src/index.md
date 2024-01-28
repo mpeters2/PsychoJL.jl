@@ -161,13 +161,13 @@ end
 DemoWindow()
 ```
 ## Missing Functionality
-mouse events
-timers (timing can be done by using Julia's time() function)
-circles
-shapeStim (arbitrary polygon)
-polygons (regular polygon)
-pie-wedges
-shapeStim
+mouse events\n
+timers (timing can be done by using Julia's time() function)\n
+circles\n
+shapeStim (arbitrary polygon)\n
+polygons (regular polygon)\n
+pie-wedges\n
+shapeStim\n
 
 
 ## Known issues
