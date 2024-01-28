@@ -271,6 +271,25 @@ end
 	draw(myellipse1)
 	draw(myellipse2)
 
+	theCircle = Circle(myWin, [800, 200], 50, lineWidth=20, lineColor = [255, 255, 255, 255],  fillColor = [0, 0, 0, 255], fill = false)
+	draw(theCircle)
+
+	theCircle2 = Circle(myWin, [1000, 200], 50, lineWidth=20, lineColor = [255, 255, 255, 255],  fillColor = [255, 0, 0, 255], fill = true)
+	draw(theCircle2)
+
+	theCircle3 = Circle(myWin, [600, 200], 50, lineWidth=1, lineColor = [255, 255, 255, 255],  fillColor = [0, 0, 0, 0], fill = false)
+	draw(theCircle3)
+
+	oval = Ellipse(myWin, [1000, 400], 100, 50, lineWidth=20, lineColor = [127, 255, 127, 255],  fillColor = [0, 0, 255, 255], fill = true)
+	draw(oval)
+
+	vertices =[ [300, 10], [400, 5], [410,150], [320, 100] ,[290, 20] ]
+	myShapeStim = ShapeStim(myWin, vertices, lineWidth = 3, lineColor = [255,128,128,255])
+	draw(myShapeStim)
+
+	myPoly = Polygon( myWin, [1200, 200], 50, 5, lineWidth = 3, lineColor = [128,128,255,255]) 
+	draw(myPoly)
+
 	#myColor = MakeInt8Color(255, 0, 255, 255)
 	#------------------------------------------------------
 	# This sections is for checking anti-aliasing and subpixels rendering bult-in to SDL2
@@ -310,10 +329,13 @@ end
 	theKey = waitKeys(myWin, 5000)
 	timeTaken = stopTimer(myWin)
 	println("the key ", theKey," was pressed. It took ", timeTaken," milliseconds")
-	
+
+	SDL_Delay(5000)
+	#=
 	for i in 1:10
 		println(getKey(myWin) )
 	end
+	=#
 	closeAndQuitPsychoJL(myWin)
 end
 

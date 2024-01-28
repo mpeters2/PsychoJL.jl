@@ -20,9 +20,9 @@ Constructor for a TextStim object
   * fontName::String = "",
   * fontSize::Int64 = 12,.........*default = 12*
   * scale::Float64 = 1.0,.........*not the same as font size*
-  * font::Any.........*default is taken from Winow*
-  * horizAlignment::Int64.........*default = 1, 0 = center, -1 = right
-  * vertAlignment::Int64 = 1.........*default = 1, 0 = center, -1 = bottom
+  * font::Any.........*default is taken from Window*
+  * horizAlignment::Int64.........*default = 1, 0 = center, -1 = right*
+  * vertAlignment::Int64 = 1.........*default = 1, 0 = center, -1 = bottom*
   * style::String.........*default = "normal", options include "bold" and "italic"*
   * orientation.........*orientation in degrees*
 

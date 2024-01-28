@@ -40,7 +40,7 @@ include( "timings.jl" )
 export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec
 export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
 export mouseVisible
-export Rect, Ellipse, sdl_ellipse, Line
+export Rect, Ellipse, Line, Circle, ShapeStim, Polygon
 export TextStim
 export waitKeys, getKey
 export ImageStim

@@ -1,7 +1,10 @@
 ```@docs
-Line
-Rect
+Circle
 Ellipse
+Line
+Polygon
+Rect
+ShapeStim
 ```
 
 #### draw(various shape types) - Method

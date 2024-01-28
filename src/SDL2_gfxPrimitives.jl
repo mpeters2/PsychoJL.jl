@@ -537,6 +537,93 @@ function aaellipseRGBA(renderer::Ptr{SDL_Renderer}, x::Int64, y::Int64, rx::Int6
 
 	return (result)
 end
+#=
+\brief Draw thick ellipse with blending.
+
+\param renderer The renderer to draw on.
+\param xc X coordinate of the center of the ellipse.
+\param yc Y coordinate of the center of the ellipse.
+\param xr Horizontal radius in pixels of the ellipse.
+\param yr Vertical radius in pixels of the ellipse.
+\param r The red value of the ellipse to draw. 
+\param g The green value of the ellipse to draw. 
+\param b The blue value of the ellipse to draw. 
+\param a The alpha value of the ellipse to draw.
+\param thick The line thickness in pixels
+
+\returns Returns 0 on success, -1 on failure.
+=#
+function thickEllipseRGBA(renderer::Ptr{SDL_Renderer}, xc::Int64, yc::Int64, xr::Int64, yr::Int64, r::Int64, g::Int64, b::Int64, a::Int64, thick::Int64)
+
+	result::Int64 = 0 ;
+	#xi, yi, xo, yo, x, y, z ;
+	#double xi2, yi2, xo2, yo2 ;
+
+	#if (thick <= 1)
+	#	return _aaellipseRGBA(renderer, xc, yc, xr, yr, r, g, b, a) ;
+	#end
+	xi = xr - thick / 2 ;
+	xo = xi + thick - 1 ;
+	yi = yr - thick / 2 ;
+	yo = yi + thick - 1 ;
+
+	if ((xi <= 0) || (yi <= 0))
+		return -1 ;
+	end
+	xi2 = xi * xi ;
+	yi2 = yi * yi ;
+	xo2 = xo * xo ;
+	yo2 = yo * yo ;
+
+	if (a != 255) 
+		result |= SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	end
+	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+	if (xr < yr)
+	    
+		#for (x = -xo; x <= -xi; x++)
+		for x in -xo:xi
+		    
+			y = sqrt(yo2 * (1.0 - x*x/xo2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc+x, yc-y, xc+x, yc+y) ;
+		end
+		#for (x = -xi + 1; x <= xi - 1; x++)
+		for x in -xi:(xi - 1)
+		    
+			y = sqrt(yo2 * (1.0 - x*x/xo2)) + 0.5 ;
+			z = sqrt(yi2 * (1.0 - x*x/xi2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc+x, yc+z, xc+x, yc+y) ;
+			result |= renderdrawline(renderer, xc+x, yc-z, xc+x, yc-y) ;
+		end
+		#for (x = xo; x >= xi; x--)
+		for x in xo:-1:xi	    
+			y = sqrt(yo2 * (1.0 - x*x/xo2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc+x, yc-y, xc+x, yc+y) ;
+		end
+	else
+		#for (y = -yo; y <= -yi; y++)
+		for y in -yo:-yi
+			x = sqrt(xo2 * (1.0 - y*y/yo2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc-x, yc+y, xc+x, yc+y) ;
+		end
+		#for (y = -yi + 1; y <= yi - 1; y++)
+		for y in (-yi + 1):(yi - 1)
+			x = sqrt(xo2 * (1.0 - y*y/yo2)) + 0.5 ;
+			z = sqrt(xi2 * (1.0 - y*y/yi2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc+z, yc+y, xc+x, yc+y) ;
+			result |= renderdrawline(renderer, xc-z, yc+y, xc-x, yc+y) ;
+		end
+		#for (y = yo; y >= yi; y--)
+		for y in yo:-1:yi;
+		    
+			x = sqrt(xo2 * (1.0 - y*y/yo2)) + 0.5 ;
+			result |= renderdrawline(renderer, xc-x, yc+y, xc+x, yc+y) ;
+		end
+	end
+	return result 
+end
+
 #-============================================================================================================================================================
 # function to draw anti-aliased filled ellipse
 #	int aaFilledEllipseRGBA(SDL_Renderer * renderer, float cx, float cy, float rx, float ry, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -692,7 +779,8 @@ function aaFilledEllipseRGBA(renderer::Ptr{SDL_Renderer}, cx::Float64, cy::Float
 				end
 				if (v > 1.0) 
 					v = 1.0 ;
-				break
+					break
+				end
 				result |= SDL_SetRenderDrawColor(renderer, r, g, b, a * v) ;
 				result |= SDL_RenderDrawPoint(renderer, xi, yi) ;
 				yi += 1 ;
@@ -700,7 +788,6 @@ function aaFilledEllipseRGBA(renderer::Ptr{SDL_Renderer}, cx::Float64, cy::Float
 		end
 	end
 	return result ;
-end
 end
 
 #---------------------------
@@ -949,6 +1036,8 @@ function y_varthick_line(B::Ptr{SDL_Renderer},
 		y= y + ystep;
 	end
 end
+#-===========================================================================================================================
+
 #-===========================================================================================================================
 function y_perpendicular(B::Ptr{SDL_Renderer},
                             x0::Int64, y0::Int64, dx::Int64, dy::Int64, xstep::Int64, ystep::Int64,
@@ -1388,7 +1477,7 @@ function WULinesAlphaWidth(win::Window, x1::Float64, y1::Float64, x2::Float64, y
 	xgap::Float64 = rfpart(x1 + 0.5);
 	xpxl1::Int32 = xend;  						#  this will be used in the main loop
 	# in original algorithm, ypxl1 was integer part of yend!!!
-	ypxl1::Int32 = floor(yend);
+	ypxl1::Int32 = floor(Int32, yend);
 	#colorAlpha = SDL_Color(colR, colG, colB, lrint(255 * (rfpart(yend) * xgap)))				
 	colorAlpha = [colR, colG, colB, lrint(255 * (rfpart(yend) * xgap))]
 	if(vertical)

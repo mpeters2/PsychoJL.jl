@@ -26,7 +26,6 @@ function waitKeys(win::Window, waitTime::Float64)
 	if win.timeScale == "milliseconds"
 		waitTime /= 1000
 	end
-	println("entered waitKeys")
 	start = time()
 	while (time() - start) < waitTime
 		while Bool(SDL_PollEvent(win.event))
@@ -55,7 +54,7 @@ function waitKeys(win::Window, waitTime::Float64)
 			end =#
 		end
 	end
-	println("exited waitKeys")
+
 end
 #------------------------------------
 """

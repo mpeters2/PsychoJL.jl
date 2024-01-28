@@ -14,7 +14,7 @@ draw(myRectJL)
 =#
 
 export Rect, Ellipse, draw
-export Line
+export Line, Circle, ShapeStim, Polygon
 
 
 
@@ -131,12 +131,12 @@ Constructor for a Rect object
 * pos::Vector{Int64}	**position**
 
 **Optional constructor inputs:**
-* units::String...**(default is "pixel"**
-* lineWidth::Int64...**(default is 1)**
-* lineColor::Vector{Int64}...**default is (128, 128, 128)**
-* fillColor::Vector{Int64}...**default is (128, 128, 128)**
-* ori::Float64 = 0.0...**(orientation in degrees)**			
-* opacity::Int64...**(default is 255)**
+* units::String......*(default is "pixel"*
+* lineWidth::Int64......*(default is 1)*
+* lineColor::Vector{Int64}......*default is (128, 128, 128)*
+* fillColor::Vector{Int64}......*default is (128, 128, 128)*
+* ori::Float64 = 0.0......*(orientation in degrees)*		
+* opacity::Int64......*(default is 255)*
 
 **Full list of fields**
 * win::Window
@@ -247,12 +247,12 @@ Constructor for an Ellipse object
 **Inputs:**
 * win::Window 
 * pos::Vector{Int64}   
-* rx::Int64 **horizontal radius**   
-* ry::Int64 **vertical radius**   
+* rx::Int64 ......*horizontal radius*  
+* ry::Int64 ......*vertical radius*
 * lineWidth::Int64				
 * lineColor::Vector{Int64}
 * fillColor::Vector{Int64}
-* fill::Bool **fill or not**
+* fill::Bool ......*fill or not*
 **Outputs:** None
 **Methods:** draw()
 """
@@ -270,7 +270,8 @@ mutable struct Ellipse
 
 	#aaellipseRGBA
 	#----------
-
+#MethodError: no method matching Ellipse(::Window, ::Vector{Int64}, ::Int64, ::Int64, ::Int64, ::Vector{Int64}, ::Vector{Int64}, ::Bool)
+#								 Ellipse(::Window, ::Vector{Int64}, ::Int64, ::Int64; lineWidth, lineColor, fillColor, fill)
 	function Ellipse(win::Window,
 					pos::Vector{Int64} = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED],		# position
 					rx::Int64 = 20,						# Horizontal radius in pixels of the aa-ellipse
@@ -309,6 +310,28 @@ function draw(El::Ellipse)
 							El.fillColor[4])
 	# I need to check if linecolor exists or has an alpha>0, and then draw the outline
 		_aaellipseRGBA(El.win.renderer,El.pos[1], El.pos[2], El.rx, El.ry, El.lineColor, El.fill)
+	end
+	if El.lineWidth > 1
+		# we need to anti-alias the outside.  When thickness is >1, radius increases by thickness / 2	
+		# outside antialias first
+		newrX = El.rx + (El.lineWidth ÷ 2) #-1
+		newrY = El.ry + (El.lineWidth ÷ 2) -1
+		_aaellipseRGBA(El.win.renderer,El.pos[1]-1, El.pos[2], newrX, newrY, El.lineColor, El.fill)
+		thickEllipseRGBA(El.win.renderer,
+							El.pos[1], 
+							El.pos[2],  
+							El.rx, 
+							El.ry, 
+							El.lineColor[1], 
+							El.lineColor[2], 
+							El.lineColor[3], 
+							El.lineColor[4],
+							El.lineWidth)
+		# inside antialias first
+		newrX = El.rx - (El.lineWidth ÷ 2) #+1
+		newrY = El.ry - (El.lineWidth ÷ 2) 
+		_aaellipseRGBA(El.win.renderer,El.pos[1]-1, El.pos[2], newrX, newrY, El.lineColor, El.fill)
+
 	else
 		_aaellipseRGBA(El.win.renderer,El.pos[1], El.pos[2], El.rx, El.ry, El.lineColor, El.fill)
 	end
@@ -325,9 +348,313 @@ function draw(El::Ellipse)
 	end
 =#
 end
+#-=====================================================================================================
+"""
+	Circle()
 
-#aaellipseRGBA(myWin.renderer, 650, 600, 50,50, 128,255, 128, 255)
+Constructor for an Circle object
 
+**Inputs:**
+* win::Window 
+* pos::Vector{Int64}   
+* rad::Int64 ......*radius* 
+* lineWidth::Int64				
+* lineColor::Vector{Int64}
+* fillColor::Vector{Int64}
+* fill::Bool ......*fill or not*
+**Outputs:** None
+**Methods:** draw()
+"""
+mutable struct Circle
+	win::Window
+	pos::Vector{Int64}
+	rad::Int64							# radius in pixels of the aa-ellipse
+	lineWidth::Int64
+	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	fillColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	fill::Bool							# these will need to change to floats to handle Psychopy colors
+	circlesEllipse::Ellipse
+
+
+	function Circle(win::Window,
+					pos::Vector{Int64} = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED],		# position
+					rad::Int64 = 20;						# Horizontal radius in pixels of the aa-ellipse
+					lineWidth::Int64 = 1,
+					lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+					fillColor::Vector{Int64} = fill(128, (4)),				# these will be Psychopy colors
+					fill::Bool = false
+			)
+
+		circlesEllipse = Ellipse(win, pos, rad, rad, lineWidth=lineWidth,lineColor=lineColor,fillColor=fillColor, fill=fill)
+
+		new(win, 
+			pos,
+			rad,
+			lineWidth,
+			lineColor,				# these will need to change to floats to handle Psychopy colors
+			fillColor,				# these will be Psychopy colors
+			fill,
+			circlesEllipse
+			)
+	end
+end
+#----------
+
+
+function draw(Circ::Circle)
+
+	draw(Circ.circlesEllipse)
+end
+#-=====================================================================================================
+# Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.
+"""
+	ShapeStim()
+
+Constructor for a ShapeStim object, which is a polygon defined by vertices.
+
+**Constructor inputs:**  
+* win::Window,
+* vertices::Vector{Vector{Int64}} 
+
+
+**Optional constructor inputs:**
+* units::String......*(default is "pixel"*
+* lineWidth::Int64......*(default is 1)*
+* lineColor::Vector{Int64}......*default is (128, 128, 128)*
+
+**Full list of fields**
+* win::Window
+* vertices::Vector{Vector{Int64}} 
+Example:
+*[ [300, 10], [400, 5], [410,150], [320, 100] ,[290, 20] ]*
+* units::String
+* lineWidth::Int64					
+* lineColor::Vector{Int64}		
+
+**Methods:** draw()
+"""
+mutable struct ShapeStim	#{T}
+	win::Window
+	vertices::Vector{Vector{Int64}}			#Vector{Int64}
+	units::String
+	lineWidth::Int64						# this will need to change to floats for Psychopy height coordiantes
+	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+
+
+	#----------
+	function ShapeStim(	win::Window,
+						vertices::Vector{Vector{Int64}} = [[10,10]];		# a single vertex placeholder
+						units::String = "pixel",
+						lineWidth::Int64 = 1,
+						lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+			)
+
+
+		new(win, 
+			vertices,
+			units,
+			lineWidth,
+			lineColor,				# these will need to change to floats to handle Psychopy colors
+			)
+
+	end
+end
+#----------
+function draw(S::ShapeStim)
+
+	numCoords = length(S.vertices)
+	if S.lineWidth == 1							# draw a single anti-aliased line
+		for i in 2:numCoords
+			WULinesAlpha(S.win, 
+							convert(Float64, S.vertices[i-1][1]), 
+							convert(Float64, S.vertices[i-1][2]), 
+							convert(Float64, S.vertices[i][1]), 
+							convert(Float64, S.vertices[i][2]),
+							convert(UInt8, S.lineColor[1]),
+							convert(UInt8, S.lineColor[2]),
+							convert(UInt8, S.lineColor[3]),
+							convert(UInt8, S.lineColor[4])
+						)
+		end
+		# close the shape
+		WULinesAlpha(S.win, 
+					convert(Float64, S.vertices[1][1]), 
+					convert(Float64, S.vertices[1][2]), 
+					convert(Float64, S.vertices[numCoords][1]), 
+					convert(Float64, S.vertices[numCoords][2]),
+					convert(UInt8, S.lineColor[1]),
+					convert(UInt8, S.lineColor[2]),
+					convert(UInt8, S.lineColor[3]),
+					convert(UInt8, S.lineColor[4])
+				)
+
+	else											
+		# If we were really cool, we would center even lines by somehow antialiasing the sides
+		# in order to make the lines look centered at the start point instead of offset.
+		for i in 2:numCoords
+			WULinesAlphaWidth(S.win, 
+							convert(Float64, S.vertices[i-1][1]), 
+							convert(Float64, S.vertices[i-1][2]), 
+							convert(Float64, S.vertices[i][1]), 
+							convert(Float64, S.vertices[i][2]),
+							convert(UInt8, S.lineColor[1]),
+							convert(UInt8, S.lineColor[2]),
+							convert(UInt8, S.lineColor[3]),
+							convert(UInt8, S.lineColor[4]),
+							S.lineWidth
+						)
+		# close the shape
+		WULinesAlphaWidth(S.win, 
+						convert(Float64, S.vertices[1][1]), 
+						convert(Float64, S.vertices[1][2]), 
+						convert(Float64, S.vertices[numCoords][1]), 
+						convert(Float64, S.vertices[numCoords][2]),
+						convert(UInt8, S.lineColor[1]),
+						convert(UInt8, S.lineColor[2]),
+						convert(UInt8, S.lineColor[3]),
+						convert(UInt8, S.lineColor[4]),
+						S.lineWidth
+					)
+		end
+	end	
+
+
+end
+
+#-=====================================================================================================
+# Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.
+"""
+	Polygon()
+
+Constructor for a regular Polygon object, such as a pentagon or hexagon.
+
+**Constructor inputs:**  
+* win::Window,
+* pos::Vector{Int64}......*[x,y] coordinates of center*
+* rad::Int64......*radius*
+* sides::Int64
+
+**Optional constructor inputs:**
+* units::String......*(default is "pixel"*
+* lineWidth::Int64......*(default is 1)*
+* lineColor::Vector{Int64}......*default is (128, 128, 128)*
+
+**Full list of fields**
+* win::Window,
+* pos::Vector{Int64}
+* rad::Int64......*radius*
+* sides::Int64
+* units::String
+* lineWidth::Int64					
+* lineColor::Vector{Int64}		
+
+**Methods:** draw()
+"""
+mutable struct Polygon	#{T}
+	win::Window
+	pos::Vector{Int64}
+	rad::Int64
+	sides::Int64
+	units::String
+	lineWidth::Int64						# this will need to change to floats for Psychopy height coordiantes
+	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+
+
+	#----------
+	function Polygon(	win::Window,
+						pos::Vector{Int64} = [10,10],		# a single vertex placeholder
+						rad::Int64 = 10,
+						sides::Int64 = 5;
+						units::String = "pixel",
+						lineWidth::Int64 = 1,
+						lineColor::Vector{Int64} = fill(128, (4))				# these will need to change to floats to handle Psychopy colors
+			)
+
+
+		new(win, 
+			pos,
+			rad,
+			sides,
+			units,
+			lineWidth,
+			lineColor,				# these will need to change to floats to handle Psychopy colors
+			)
+
+	end
+end
+#----------
+function draw(P::Polygon)
+	# it would be more efficient to initially fill this with pairs of zeros (pre-allocate)
+	vertices = []
+
+	for i in 1:P.sides
+		x = P.pos[1] + P.rad * sin(2 * pi * i/P.sides)				# this is technically wrong, but I swap sine and cos
+		y = P.pos[2] + P.rad * cos(2 * pi * i/P.sides)				# so that their bases will be on the bottom
+		push!(vertices, [round(Int64, x),round(Int64, y)])
+	end
+
+	if P.lineWidth == 1							# draw a single anti-aliased line
+		for i in 2:P.sides
+			WULinesAlpha(P.win, 
+							convert(Float64, vertices[i-1][1]), 
+							convert(Float64, vertices[i-1][2]), 
+							convert(Float64, vertices[i][1]), 
+							convert(Float64, vertices[i][2]),
+							convert(UInt8, P.lineColor[1]),
+							convert(UInt8, P.lineColor[2]),
+							convert(UInt8, P.lineColor[3]),
+							convert(UInt8, P.lineColor[4])
+						)
+		end
+		# close the shape
+		WULinesAlpha(P.win, 
+					convert(Float64, vertices[1][1]), 
+					convert(Float64, vertices[1][2]), 
+					convert(Float64, vertices[P.sides][1]), 
+					convert(Float64, vertices[P.sides][2]),
+					convert(UInt8, P.lineColor[1]),
+					convert(UInt8, P.lineColor[2]),
+					convert(UInt8, P.lineColor[3]),
+					convert(UInt8, P.lineColor[4])
+				)
+
+	else											
+		# If we were really cool, we would center even lines by somehow antialiasing the sides
+		# in order to make the lines look centered at the start point instead of offset.
+		for i in 2:P.sides
+			WULinesAlphaWidth(P.win, 
+							convert(Float64, vertices[i-1][1]), 
+							convert(Float64, vertices[i-1][2]), 
+							convert(Float64, vertices[i][1]), 
+							convert(Float64, vertices[i][2]),
+							convert(UInt8, P.lineColor[1]),
+							convert(UInt8, P.lineColor[2]),
+							convert(UInt8, P.lineColor[3]),
+							convert(UInt8, P.lineColor[4]),
+							P.lineWidth
+						)
+		# close the shape
+		WULinesAlphaWidth(P.win, 
+						convert(Float64, vertices[1][1]), 
+						convert(Float64, vertices[1][2]), 
+						convert(Float64, vertices[P.sides][1]), 
+						convert(Float64, vertices[P.sides][2]),
+						convert(UInt8, P.lineColor[1]),
+						convert(UInt8, P.lineColor[2]),
+						convert(UInt8, P.lineColor[3]),
+						convert(UInt8, P.lineColor[4]),
+						P.lineWidth
+					)
+		end
+	end	
+
+end
+
+#-=====================================================================================================
+#-======================================================================================================================
+
+#-======================================================================================================================
+#=
 #----------# from https://stackoverflow.com/questions/38334081/how-to-draw-circles-arcs-and-vector-graphics-in-sdl
 
 #draw one quadrant arc, and mirror the other 4 quadrants
@@ -384,7 +711,7 @@ end
 
 
 #-====================================================================
-#=
+
 function draw(L::Line)
 	#=
 	SDL_SetRenderDrawColor(L.win.renderer, 
