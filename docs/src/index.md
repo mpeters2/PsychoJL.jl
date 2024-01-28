@@ -87,7 +87,7 @@ the parameter for this function is perfectly legal (from a syntactic point of vi
 
 ```julia
 function fancyMath(myArray)
-	answer = doSomeStuff()
+	answer = doSomeStuff(myArray)
 	return answer
 end
 ```
@@ -95,7 +95,7 @@ But, is even better, because it explicitely states the parameter's type:
 
 ```julia
 function fancyMath(myArray::Vector{Float64})
-	answer = doSomeStuff()
+	answer = doSomeStuff(myArray)
 	return answer
 end
 ```
