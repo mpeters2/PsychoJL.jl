@@ -31,7 +31,8 @@ Constructor for a Window object
   * size::MVector{2, Int64}		
   * pos::MVector{2, Int64}	......*position*
   * color::MVector{3, Int64}			
-  * colorSpace::String				
+  * colorSpace::String		
+  * coordinateSpace::String	......*placeholder for now*
   * renderer::Ptr{SDL_Renderer}
   * font::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
   * boldFont::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
@@ -58,6 +59,7 @@ mutable struct Window	#{T}
 	pos::MVector{2, Int64}		# position
 	color::MVector{3, Int64}			# these will be Psychopy colors
 	colorSpace::String				# might need to revist for colors.jl
+	coordinateSpace::String		#	LT_Pix, LT_Percent, PsychoPy
 	renderer::Ptr{SDL_Renderer}
 	font::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
 	boldFont::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
@@ -72,7 +74,8 @@ mutable struct Window	#{T}
 	function Window(size,			# window size; static array (stay away from tuples)
 					fullScreen = false;
 					color = fill(0, (3)),					# these will be Psychopy colors
-					colorSpace = "rgb",						# might need to revist for colors.jl
+					colorSpace = "rgba255",						# might need to revist for colors.jl
+					coordinateSpace = "LT_Pix",
 					pos = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED],		# position
 					timeScale = "milliseconds",
 					title = "Window"
@@ -85,7 +88,7 @@ mutable struct Window	#{T}
 			println("* default to milliseconds for timing.")
 			timeScale = "milliseconds"
 		end
-
+# for default size, try to use a version of the fullscreen size, taking Retina into account
 		displayInfo = Ref{SDL_DisplayMode}()
 		SDL_GetCurrentDisplayMode(0, displayInfo)
 		screenWidth = displayInfo[].w
@@ -181,6 +184,7 @@ mutable struct Window	#{T}
 			pos, 
 			color, 
 			colorSpace, 
+			coordinateSpace,
 			renderer,
 			font,
 			boldFont,

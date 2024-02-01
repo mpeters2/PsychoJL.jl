@@ -8,6 +8,7 @@ using SDL2_ttf_jll
 using SDL2_gfx_jll
 using Revise
 using JET
+using Printf
 
 #=
 	√	missing textbox
@@ -68,7 +69,7 @@ function DemoWindow()
 	#IDnumber = textInputDialog( "Enter the subject ID number", "000")
 	#println("Id number received is", IDnumber)
 
-	myWin = Window( [1000,1000], false)
+	myWin = Window( [2560, 1440], true)			#	2560, 1440			[1000,1000]
 
 	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable Window.  Scales contents when resized
 	
@@ -313,14 +314,45 @@ end
 =#
 	#----
 	SDL_SetRenderDrawColor(myWin.renderer, 255,255,255,255)	
+	#=
 	SDL_RenderDrawLineF(myWin.renderer, 1520.5, 10, 1530.5, 1500 )		# shallow
 	SDL_RenderDrawLineF(myWin.renderer, 1530, 10, 1540, 1500 )		# shallow
 	SDL_RenderDrawLineF(myWin.renderer, 1620.5, 10, 1920.5, 310 )		# 45°
 	SDL_RenderDrawLineF(myWin.renderer, 1630, 10, 1930, 310 )		# 45°
+	=#
+	theLine = Line(myWin, [1520, 10], [1530, 1500], width = 1, lineColor = myColor )
+	draw(theLine)
 	#------------------------------------------------------
 	imagePath = joinpath(dirname(pathof(SimpleDirectMediaLayer)), "..", "assets", "cat.png")
 	myImage = ImageStim(myWin, imagePath)
 	draw(myImage, magnification = 10.0)
+	#---------------------
+	winSize = getSize(myWin)
+	x = round(Int64, winSize[2]/2)
+	widthRatio = winSize[1]/winSize[2]
+
+	expLine1 = Line2(myWin, [x, 0], [x, winSize[1]], width = 1, lineColor = [255,0,0,255] )		# int coordinates
+	#expLine2 = Line2(myWin, [0.98, 0.0], [0.98, 1.0], width = 1, lineColor = [0,255,0,255] )		# float coordinates
+
+#	green is much too short 
+#	and red does not show up at all.
+	draw(expLine1)
+
+	expLine2 = Line2(myWin, [0.0, 0.02], [widthRatio, 0.02], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+	draw(expLine2)
+	expLine2 = Line2(myWin, [0.0, 0.98], [widthRatio, 0.98], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+	draw(expLine2)
+
+
+	expLine2 = Line2(myWin, [0.02, 0.00], [0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+	draw(expLine2)
+	expLine2 = Line2(myWin, [widthRatio - 0.02, 0.0], [widthRatio - 0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+	draw(expLine2)
+
+	message = @sprintf("width ratio = %4.2f",  widthRatio)
+	myText = TextStim(myWin,  message, [300, 300], color = [0, 255, 255, 255])
+	draw(myText)
+	#---------------------
 
 	flip(myWin)
 

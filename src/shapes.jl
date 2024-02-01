@@ -14,7 +14,7 @@ draw(myRectJL)
 =#
 
 export Rect, Ellipse, draw
-export Line, Circle, ShapeStim, Polygon
+export Line, Circle, ShapeStim, Polygon, Line2
 
 
 
@@ -116,6 +116,149 @@ end
 #-==========================
 function getLineLength(L::Line)
 	return sqrt( ((L.startPoint[1] - L.endPoint[1]) ^2)  + ((L.startPoint[2] - L.endPoint[2])^2) )
+end
+#-=====================================================================================================
+#- Line2 experiments with using multiple dispatch for coordinate systems
+mutable struct Line2	
+	win::Window
+	startPoint::Vector{Real}
+	endPoint::Vector{Real}
+	width::Int64							# this will need to change to floats for Psychopy height coordiantes
+	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	_startPoint::Vector{Int64}
+	_endPoint::Vector{Int64}
+	#----------
+	function Line2(	win::Window,
+					startPoint::Vector{Int64} = [0,0],
+					endPoint::Vector{Int64} = [10,10];
+					width::Int64 = 1,
+					lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+					_startPoint::Vector{Int64} = [0,0],
+					_endPoint::Vector{Int64} = [10,10]
+			)
+
+		if length(endPoint) != 2
+			message = "endPoint needs two coordinates, got " * String(length(endPoint)) * " instead."
+			error(message)
+		end
+		if length(startPoint) != 2
+			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
+			error(message)
+		end		
+		new(win, 
+			startPoint,
+			endPoint,
+			width,
+			convert(Vector{Int64},lineColor),
+			startPoint,
+			endPoint
+			)
+
+	end
+	#----------
+	function Line2(	win::Window,
+					startPoint::Vector{Float64} = [0.1,0.1],
+					endPoint::Vector{Float64} = [0.2,0.2];
+					width::Int64 = 1,
+					lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+					_startPoint::Vector{Int64} = [0,0],
+					_endPoint::Vector{Int64} = [10,10]
+				)
+
+		if length(endPoint) != 2
+			message = "endPoint needs two coordinates, got " * String(length(endPoint)) * " instead."
+			error(message)
+		end
+		if length(startPoint) != 2
+			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
+			error(message)
+		end		
+		_, displayHeight = getSize(win)
+
+		if win.coordinateSpace == "PsychoPy"											
+			_startPoint[1] = round(Int64, (startPoint[1]+0.5) * displayHeight)		# convert PsychoPy to Percent coordinates first then percentage to pixels
+			_startPoint[2] = round(Int64, (-startPoint[2]+0.5) * displayHeight)
+			_endPoint[1] = round(Int64, (endPoint[1]+0.5) * displayHeight)
+			_endPoint[2] = round(Int64, (-endPoint[2]+0.5) * displayHeight)
+		else
+			_startPoint[1] = round(Int64, startPoint[1] * displayHeight)		# convert percentage to pixels
+			_startPoint[2] = round(Int64, startPoint[2] * displayHeight)
+			_endPoint[1] = round(Int64, endPoint[1] * displayHeight)
+			_endPoint[2] = round(Int64, endPoint[2] * displayHeight)
+		end
+		new(win, 
+			startPoint,
+			endPoint,
+			width,
+			convert(Vector{Int64},lineColor),
+			_startPoint,
+			_endPoint
+			)
+
+	end
+
+end
+#----------
+function ConvertPsychoPyToFloatCoords(coord::Vector{Int64})
+	x = coord[1] + 0.5
+	y = -coord[2] + 0.5
+
+	return [x,y]
+end
+#----------
+function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Int64})
+	_, displayHeight = getSize(win)
+	x = coord[1] * displayHeight
+	y = -coord[2] * displayHeight
+
+	return [x,y]
+end
+#----------
+function ConvertPsychoPyToPixels(win::Window, coord::Vector{Int64})
+	coord = ConvertPsychoPyToFloatCoords(coord)
+	return ConvertFloatCoordsToPixels(win, coord)
+end
+#----------
+# This (the name) makes no sense!  Do not write code late at night!
+function convertFloatCoordToInt255(coords::Vector{Float64})
+	out = ones(Int64, 2)
+	out[1] = round(Int64, coords[1] * 255)
+	out[2] = round(Int64, coords[2] * 255)
+	return out
+end
+#----------
+function draw(L::Line2)
+
+	if L.width == 1							# draw a single anti-aliased line
+		WULinesAlpha(L.win, 
+						convert(Float64, L._startPoint[1]), 
+						convert(Float64, L._startPoint[2]), 
+						convert(Float64, L._endPoint[1]), 
+						convert(Float64, L._endPoint[2]),
+						convert(UInt8, L.lineColor[1]),
+						convert(UInt8, L.lineColor[2]),
+						convert(UInt8, L.lineColor[3]),
+						convert(UInt8, L.lineColor[4])
+					)
+
+	else											
+		# If we were really cool, we would center even lines by somehow antialiasing the sides
+		# in order to make the lines look centered at the start point instead of offset.
+		WULinesAlphaWidth(L.win, 
+						convert(Float64, L._startPoint[1]), 
+						convert(Float64, L._startPoint[2]), 
+						convert(Float64, L._endPoint[1]), 
+						convert(Float64, L._endPoint[2]),
+						convert(UInt8, L.lineColor[1]),
+						convert(UInt8, L.lineColor[2]),
+						convert(UInt8, L.lineColor[3]),
+						convert(UInt8, L.lineColor[4]),
+						L.width
+					)
+
+	end
+
+ 
 end
 #-=====================================================================================================
 # Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.

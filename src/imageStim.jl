@@ -62,7 +62,7 @@ mutable struct ImageStim	#{T}
 		#-------
 		new(win, 
 			imageName,
-			[ convert(Int64, winW/2), convert(Int64, winH/2)],
+			[ round(Int64, winW/2), round(Int64, winH/2)],	
 			image,
 			w,							# this will need to change to floats for Psychopy height coordiantes
 			h
