@@ -1,7 +1,7 @@
 name = "PsychoJL"
 uuid = "77c98508-ef4f-4ba4-b29c-7765a84ccfdf"
 authors = ["Matthew Steely Peterson"]
-version = "0.1.0-DEV"
+version = "0.1.0"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
@@ -27,7 +27,7 @@ CEnum = "0.4.0 - 0.4.2"
 Documenter = "1.2.0 - 1.2.1"
 DocumenterTools = "0.1.18 - 0.1.19"
 Images = "0.25.0 - 0.26.0"
-JET  = "0.8.24 - 0.8.27"
+JET  = "0.0.1 - 0.8.27"
 Observables = "0.5.0 - 0.5.5"
 QML = "0.8.0 - 0.8.1"
 Revise = "3.5.10 - 3.5.13"
@@ -39,4 +39,3 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test"]
-
