@@ -6,6 +6,7 @@ include("guiUtilityFunctions.jl")
 using Dates
 
 export displayMessage, askQuestionDialog, fileOpenDlg,  inputDialog, textInputDialog, DlgFromDict
+export infoMessage, happyMessage, warningMessage, errorMessage
 
 # make fileOpenDlg actually work
 # mask ask dialog look nice
@@ -55,6 +56,213 @@ function displayMessage( message::String)
 			end
 		end
 	end
+
+end
+#-=============================================
+"""
+	infoMessage( message::String)
+
+Displays a message along with an "OK" button.  Use before opening the main window
+or after closing the main window.  Useful for displaying general information.
+
+**Inputs:** String\n
+**Outputs:** Nothing\n
+!["picture of a infoMessage dialog"](infoMessage.png)
+"""
+function infoMessage( message::String)
+	genericMessage(message, "information.png")
+end
+#-----------------
+"""
+	happyMessage( message::String)
+
+Displays a message along with an "OK" button.  Use before opening the main window
+or after closing the main window.  Useful for experiment completion messages.
+
+**Inputs:** String\n
+**Outputs:** Nothing\n
+!["picture of a happyMessage dialog"](happyMessage.png)
+"""
+function happyMessage( message::String)
+	genericMessage(message, "HappyFace.png")
+end
+#-----------------
+"""
+	warningMessage( message::String)
+
+Displays a message along with an "OK" button.  Use before opening the main window
+or after closing the main window.  Useful for displaying non-critical warnings.
+
+**Inputs:** String\n
+**Outputs:** Nothing\n
+!["picture of a warningMessage dialog"](warningMessage.png)
+"""
+function warningMessage( message::String)
+	genericMessage(message, "warning.png")
+end
+#-----------------
+"""
+	errorMessage( message::String)
+
+Displays a message along with an "OK" button.  Use before opening the main window
+or after closing the main window.  Useful for displaying critical errors.
+
+**Inputs:** String\n
+**Outputs:** Nothing\n
+!["picture of a errorMessage dialog"](errorMessage.png)
+"""
+function errorMessage( message::String)
+	genericMessage(message, "error.png")
+end
+
+#does SDL do text wrap?
+#Even so, I want to use \n to add new lines
+#-=============================================
+function genericMessage( message::String, imageName::String)
+
+	SCREEN_WIDTH = 360
+	SCREEN_HEIGHT = 125
+	CENTERX = SCREEN_WIDTH ÷ 2
+	CENTERY = SCREEN_HEIGHT ÷ 2
+
+	buttonClicked = "NoButton"
+	quit::Bool = false;
+
+	mX = Ref{Cint}()					# pointers that will receive mouse coordinates
+	mY = Ref{Cint}()
+
+	SDLevent = Ref{SDL_Event}()									#Event handler
+	
+	textColor =  SDL_Color(0, 0, 0, 0xFF)						#Set text color as black
+
+	dialogWin = Window([SCREEN_WIDTH, SCREEN_HEIGHT], false, title = "")
+
+	renderer = dialogWin.renderer
+	
+	gFont = dialogWin.font
+
+	if gFont == C_NULL
+		println("*** Error: gFont is NULL")
+	end
+	SDL_PumpEvents()									# this erases whatever random stuff was in the backbuffer
+	SDL_SetRenderDrawColor(dialogWin.renderer, 250, 250, 250, 255)
+	SDL_RenderClear(dialogWin.renderer)		
+
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	TTF_SizeText(gFont, message, w::Ref{Cint}, h::Ref{Cint})
+	label = TextStim(dialogWin, message, [CENTERX + 40, 10 + (1*(h[] + 10)) ],		# the centerX * 1.5 seem weird, that's because of retina = 0.75 of width
+#	label = TextStim(dialogWin, message, [round(Int64, SCREEN_WIDTH *0.8), 10 + (1*(h[] + 10)) ],		# the centerX * 1.5 seem weird, that's because of retina = 0.75 of width
+	#label = TextStim(dialogWin, message, [round(Int64,CENTERX * 1.5), 10 + (1*(h[] + 10)) ],		# the centerX * 1.5 seem weird, that's because of retina = 0.75 of width
+						color = [0, 0, 0], 
+						fontSize = 24, 
+						horizAlignment = -1, 
+						vertAlignment = 1 )
+	draw(label, wrapLength = round(Int64,SCREEN_WIDTH*1.5)-50 )			# SCREEN_WIDTH seems weird, but retina doubles/halves everything
+	#---------
+	# draw alert
+	parentDir = pwd()
+	filePath = joinpath(parentDir, "artifacts")
+	filePath = joinpath(filePath, imageName)
+	#symbol = ImageStim(	dialogWin, filePath,  [round(Int64, SCREEN_WIDTH *0.2), CENTERY] )
+	symbol = ImageStim(	dialogWin, filePath,  [CENTERX ÷ 1.5, SCREEN_HEIGHT] )			# This might break with retina
+	draw(symbol, magnification = 0.4)
+
+	#---------
+	# draw OK button
+	OKtext = TextStim(dialogWin, "OK",	[0, 0])
+	OKbutton = ButtonStim(dialogWin,
+				#[ 20 + (widestKey),  10 + ((length(labels)+1) * (h[] +10)) ],		# was 0.75, buthigh dpi shenanigans
+				#[ widestKey, h[] + 10],
+				[ round(Int64, SCREEN_WIDTH *0.8), SCREEN_HEIGHT - (h[] ÷ 2)],
+				[ (SCREEN_WIDTH ÷ 5) , h[] + 10],
+				OKtext,					
+				"default")
+	_, ytemp = OKbutton.pos
+	ytemp ÷= 2
+	#OKbutton.pos[2] = ytemp
+	buttonDraw(OKbutton)
+	OKmap = ButtonMap(OKbutton, "OK-clicked")
+	#---------
+	# Play alert sound
+	parentDir = pwd()
+	filePath = joinpath(parentDir, "artifacts")
+	filePath = joinpath(filePath, "qbeep.wav")
+	mySound = SoundStim(filePath)
+	play(mySound)
+	#---------
+
+
+	while( !quit )
+			while Bool(SDL_PollEvent(SDLevent))			# Handle events on queue
+			event_ref = SDLevent
+			evt = event_ref[]
+			evt_ty = evt.type
+			evt_key = evt.key
+			evt_text = evt.text
+			evt_mouseClick = evt.button
+ 	
+			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
+			if( evt_ty == SDL_KEYDOWN )							#Special key input
+
+				#Handle backspace
+				if evt_key.keysym.sym == SDLK_RETURN || evt_key.keysym.sym == SDLK_KP_ENTER
+
+					SDL_StopTextInput();										#Disable text input
+					hideWindow(dialogWin)
+					SDL_RenderPresent( renderer );
+					closeWinOnly(dialogWin)
+
+					return "OK"
+				end
+
+			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )				# new version makes a list of clicked items, and the item with the focus is the winner
+				x = evt_mouseClick.x
+				y = evt_mouseClick.y
+
+				if (OKmap.rightBottom[1] > x > OKmap.leftTop[1]) && (OKmap.rightBottom[2] > y > OKmap.leftTop[2])
+					OKmap.state = "clicked"
+					SDL_StopTextInput();										#Disable text input
+					hideWindow(dialogWin)
+					SDL_RenderPresent( renderer );
+					closeWinOnly(dialogWin)
+
+					return "OK"
+				end
+
+			end
+		end
+		SDL_SetRenderDrawColor(renderer, 250, 250, 250, 255)
+		SDL_RenderClear( renderer );
+		#--------------------------------------------
+		# Update widgets and such
+		draw(label,  wrapLength = round(Int64,SCREEN_WIDTH*1.5)-50 )
+		draw(symbol, magnification = 0.4)
+
+		#-------------------
+		#Update screen
+		if OKmap.state == "unclicked"
+			buttonDraw(OKmap.button)
+		elseif OKmap.state == "clicked"
+			buttonDrawClicked(OKmap.button)
+			OKmap.state = "unclicked"
+			quit = true
+			buttonClicked = OKmap.button.TextStim.textMessage
+		end
+
+		SDL_RenderPresent( renderer );
+		# check for enter or cancel
+	end
+	#--------------   Show stuff
+	SDL_StopTextInput();										#Disable text input
+
+	hideWindow(dialogWin)
+	SDL_RenderPresent( renderer );
+	#SDL_DestroyWindow(SDL_Window * Window)
+	closeWinOnly(dialogWin)
+
+
+	return "OK"
 
 end
 
@@ -221,7 +429,7 @@ function textInputDialog( promptString::String, defaultText::String)
 			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
 		
 			if( evt_ty == SDL_KEYDOWN )							#Special key input
-				println("evt_key.keysym.sym = ", evt_key.keysym.sym )
+
 				#Handle backspace
 				if( evt_key.keysym.sym == SDLK_BACKSPACE && length(inputText) > 0 )
 					if (length(inputText) - cursorLocation - 1) >= 0
@@ -533,7 +741,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
 		
 			if( evt_ty == SDL_KEYDOWN )							#Special key input
-				println("evt_key.keysym.sym = ", evt_key.keysym.sym )
+
 				#Handle backspace
 				if( evt_key.keysym.sym == SDLK_BACKSPACE && length(inputText) > 0 )
 					if (length(inputText) - cursorLocation - 1) >= 0
@@ -951,8 +1159,7 @@ function DlgFromDict(dlgDict::Dict)
  	
 			# We only want to update the input text texture when we need to so we have a flag that keeps track of whether we need to update the texture.
 			if( evt_ty == SDL_KEYDOWN )							#Special key input
-				println("evt_key.keysym.sym = ", evt_key.keysym.sym )
-				println("....", evt_ty," ,",typeof(inputWidgets[focusedInput]))
+
 				#Handle backspace
 				if typeof(inputWidgets[focusedInput]) == InputBox
 					if( evt_key.keysym.sym == SDLK_BACKSPACE && length(inputWidgets[focusedInput].valueText) > 0 ) 

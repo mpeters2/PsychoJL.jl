@@ -55,6 +55,11 @@ function DemoWindow()
 #	displayWarning(" a warning")
 	InitPsychoJL()
 
+
+	infoMessage("This is some important information.")
+	happyMessage("Thank-you for participating.\nYou are free to go.")
+	warningMessage("Something suspicious happened.")
+	errorMessage("Critical error: your CPU is melting.\nPlease call the fire department at your earliest convenience.")
 	#------------------------------------------
 	exp_info = Dict("subject_nr"=>0, "age"=>0, "handedness"=>("right","left","ambi"), 
             "gender"=>("male","female","other","prefer not to say"))
@@ -69,9 +74,22 @@ function DemoWindow()
 	#IDnumber = textInputDialog( "Enter the subject ID number", "000")
 	#println("Id number received is", IDnumber)
 
-	myWin = Window( [2560, 1440], true)			#	2560, 1440			[1000,1000]
+	myWin = Window( [2560, 1440], false)			#	2560, 1440			[1000,1000]
 
 	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable Window.  Scales contents when resized
+	#-------- **********************************************
+	LipsumString = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+
+	LipsumText = TextStim(myWin,  LipsumString, [100, 300], color = [255, 255, 255])
+	draw(LipsumText, wrapLength = 500)
+
+	LipsumRect = Rect(myWin, 500, 500, [350,282], lineColor = [255,255,0, 255], fillColor = [0,0,0,255], opacity = 0.5 )
+	draw(LipsumRect) 
+
+
+	flip(myWin)
+	getKey(myWin)
+	#-------- **********************************************
 	
 #	renderer = SDL_CreateRenderer(myWin.win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
 
@@ -235,8 +253,24 @@ end
 	myLine5 = Line(myWin, [500, 625], [1000, 875], width = 5, lineColor = myColor5 )	
 	draw(myLine5)
 
-	myText = TextStim(myWin,  "Using a TextStim", [300, 100], color = [255, 255, 128])
+	# draw a grid to evaluate where text is drawn
+	for x in 0:50:250
+		tempLine = Line(myWin, [x,0], [x,250], width = 1, lineColor = [200, 200, 200, 255] ) 
+		draw(tempLine)
+	end
+	for y in 0:50:250
+		tempLine = Line(myWin, [0,y], [250,y], width = 1, lineColor = [200, 200, 200, 255] ) 
+		draw(tempLine)
+	end
+	myText = TextStim(myWin,  "Using a TextStim", [100, 100], color = [255, 255, 128])
 	draw(myText)
+
+	textLine = Line(myWin, [100,100], [400,100], width = 1, lineColor = [128, 255, 255, 255] ) 
+	draw(textLine)
+
+	textLine = Line(myWin, [100,100], [100,50], width = 1, lineColor = [128, 255, 255, 255] ) 
+	draw(textLine)
+
 
 	myLine6 = Line(myWin, [1300, 200], [1305, 1500], width = 1, lineColor = myColor )
 	draw(myLine6)
@@ -324,7 +358,7 @@ end
 	draw(theLine)
 	#------------------------------------------------------
 	imagePath = joinpath(dirname(pathof(SimpleDirectMediaLayer)), "..", "assets", "cat.png")
-	myImage = ImageStim(myWin, imagePath)
+	myImage = ImageStim(myWin, imagePath, [250,400])
 	draw(myImage, magnification = 10.0)
 	#---------------------
 	winSize = getSize(myWin)
@@ -350,7 +384,7 @@ end
 	draw(expLine2)
 
 	message = @sprintf("width ratio = %4.2f",  widthRatio)
-	myText = TextStim(myWin,  message, [300, 300], color = [0, 255, 255, 255])
+	myText = TextStim(myWin,  message, [100, 300], color = [0, 255, 255, 255])
 	draw(myText)
 	#---------------------
 
@@ -368,6 +402,13 @@ end
 		println(getKey(myWin) )
 	end
 	=#
+	done = false
+	while done == false
+		key = getKey(myWin)
+		if key == "q"
+			done = true
+		end
+	end
 	closeAndQuitPsychoJL(myWin)
 end
 

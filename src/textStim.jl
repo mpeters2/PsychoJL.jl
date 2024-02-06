@@ -21,7 +21,7 @@ Constructor for a TextStim object
   * fontSize::Int64 = 12,.........*default = 12*
   * scale::Float64 = 1.0,.........*not the same as font size*
   * font::Any.........*default is taken from Window*
-  * horizAlignment::Int64.........*default = 1, 0 = center, -1 = right*
+  * horizAlignment::Int64.........*default = -1, 0 = center, +1 = right*
   * vertAlignment::Int64 = 1.........*default = 1, 0 = center, -1 = bottom*
   * style::String.........*default = "normal", options include "bold" and "italic"*
   * orientation.........*orientation in degrees*
@@ -57,8 +57,8 @@ mutable struct TextStim	#{T}
 					fontSize::Int64 = 12,
 					scale::Float64 = 1.0,
 					font::Any = nothing,											# font is for internal use and is a pointer to a TTF
-					horizAlignment::Int64 = 1,
-					vertAlignment::Int64 = 1,
+					horizAlignment::Int64 = -1,
+					vertAlignment::Int64 = +1,
 					style::String = "normal",
 					orientation::Int64 = 0
 					)
@@ -89,15 +89,17 @@ end
 #----------
 #----------
 """
-	draw(text::TextStim)
+	draw(text::TextStim; wrapLength::Int64)
 
 Draws an TextStim to the back buffer.
 
-**Inputs: **
+**Inputs:**
  * text::TextStim
 
+**Optional Inputs:**
+ *  wrapLength::Int64......*in pixels (for now)*
 """
-function draw(text::TextStim)
+function draw(text::TextStim; wrapLength::Int64 = -1)	
 	if length(text.color) == 4
 		color = SDL_Color(text.color[1], text.color[2] , text.color[3], text.color[4])
 	elseif length(text.color) == 3
@@ -107,21 +109,7 @@ function draw(text::TextStim)
 		println("Length = ", length(text.color))
 		println("Values = ", text.color)
 	end
-	# as TTF_RenderText_Solid could only be used on
-	# SDL_Surface then you have to create the surface first+
-	#=
-	if text.style == "normal"
-		TTF_SetFontStyle(text.font, TTF_STYLE_NORMAL)
-	elseif text.style == "italic"
-		TTF_SetFontStyle(text.font, TTF_STYLE_ITALIC)
-	elseif text.style == "bold"
-		TTF_SetFontStyle(text.font, TTF_STYLE_BOLD)
-	elseif text.style == "underline"
-		TTF_SetFontStyle(text.font, TTF_STYLE_UNDERLINE)
-	else
-		error("Unrecognized font style. 'normal', 'italic', 'bold', and 'underline' are recognized.")
-	end
-	=#
+	#-------------------
 	if text.style == "normal"
 		text.font = text.win.font
 	elseif text.style == "italic"
@@ -134,19 +122,33 @@ function draw(text::TextStim)
 
 	
 	#---------
-	surfaceMessage = TTF_RenderUTF8_Blended(text.font, text.textMessage, color)		# text.win.font
-#	surfaceMessage = TTF_RenderText_Blended(text.font, text.textMessage, color)		# text.win.font
+	if wrapLength == -1
+		surfaceMessage = TTF_RenderUTF8_Blended(text.font, text.textMessage, color)		# text.win.font
+		Message = SDL_CreateTextureFromSurface(text.win.renderer, surfaceMessage);
+	#else
+	#	surfaceMessage = TTF_RenderUTF8_Blended_Wrapped(text.font, text.textMessage, color, wrapLength)
+	end
 
 	# now you can convert it into a texture
-	Message = SDL_CreateTextureFromSurface(text.win.renderer, surfaceMessage);
+
 
 #@engineerX you can get dimensions of rendered text with TTF_SizeText(TTF_Font *font, const char *text, int *w, int *h)
 
 	w = Ref{Cint}()
 	h = Ref{Cint}()
-	TTF_SizeText(text.font, text.textMessage, w::Ref{Cint}, h::Ref{Cint})		# Ref is used if Julia controls the memory
-	#println("w: ", w,", value = ", w[] )
+	if wrapLength == -1
+		TTF_SizeText(text.font, text.textMessage, w::Ref{Cint}, h::Ref{Cint})		# Ref is used if Julia controls the memory
+		singleHeight = h[]
+	else
+		TTF_SizeText(text.font, text.textMessage, w::Ref{Cint}, h::Ref{Cint})		# Ref is used if Julia controls the memory
+		singleHeight = h[]
+		#println("conventional width and height are: ", w[],", ",h[]," for the text: ",text.textMessage)
+		#w[], h[] = ttf_size_utf8_wrappedAI(text.font, text.textMessage, wrapLength)
+		strings, widths, h[] = wrapText(text.font, text.textMessage, wrapLength)
+		#println("wrap width and height are: ", w[],", ",h[]," for the text: ",text.textMessage)
+	end
 
+	
 	if text.vertAlignment == -1											# top anchored
 		y = text.pos[2]
 		cy  = 0
@@ -155,6 +157,9 @@ function draw(text::TextStim)
 		cy = h[]÷2
 	elseif text.vertAlignment == +1										# bottom anchored
 		y = text.pos[2] - h[]
+		if y < singleHeight + 5													# enforce a minimum height so it doesn't go off the top.
+			y = 5
+		end
 		cy = h[]
 	else
 		error("invalid text vertical text alignment parameter")
@@ -178,11 +183,26 @@ function draw(text::TextStim)
 	if text.scale != 1								# scale the text.  Not the same as changing the font size.
 		Message_rect = SDL_Rect(x, y, round(Int64, w[] * text.scale), round(Int64, h[] * text.scale) )
 	else
-		Message_rect = SDL_Rect(x, y, w[], h[])
+		if wrapLength == -1
+			Message_rect = SDL_Rect(x, y, w[], h[])
+		else
+			Message_rect = SDL_Rect(x, y + h[]÷2, w[], h[])
+		end
 	end
 	#SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
 	if text.orientation == 0 
-		SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+		if wrapLength == -1
+			SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
+		else
+			for s in 1:length(strings)			# loop through the sub-strings of wrapped text.
+				surfaceMessage = TTF_RenderUTF8_Blended(text.font, strings[s], color)		# text.win.font
+				Message = SDL_CreateTextureFromSurface(text.win.renderer, surfaceMessage)
+
+			
+				Message_rect = SDL_Rect(x, y + (s-1)*singleHeight, round(Int64, widths[s] * text.scale), round(Int64, singleHeight * text.scale) )
+				SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) )
+			end
+		end
 	else
 		center = SDL_Point(cx, cy)
 		SDL_RenderCopyEx(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect), text.orientation, Ref{SDL_Point}(center), SDL_FLIP_NONE)
@@ -201,8 +221,212 @@ end
 function setFont(text::TextStim, fontName::String)
 	println("setFont(::TextStim, fontName) is a future placeholder for loading a font of the specified name")
 end
+#-------------------------------
+const lineSpace = 2;
+#-=============================================================================
+function character_is_delimiter(c::Char, delimiters)
+    for d in delimiters
+        if c == d
+            return true
+        end
+    end
+    return false
+end
+#-=============================================================================
+# returns a list of strings for plotting, as well as the resulting width and height
+function wrapText(font, original::String, wrapWidth)
+
+	if wrapWidth <= 0
+		error("wrapWidth must be > 0")
+	end
+
+	line_space = 2
+	strings = []
+
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	TTF_SizeText(font, original, w, h)		# Ref is used if Julia controls the memory
+	#-------------------
+	# return if string does not need to be wrapped
+	if w[] < wrapWidth
+		push!(strings, original)
+		return strings, w[], h[]
+	end
+	#-------------------
+
+	wrap_delims = [' ', '\t', '\r', '\n']
+	lineBreak_delims = ['\r', '\n']
+
+	currentStr = original
+	startSpot = 1
+	endSpot = length(original)
+	done = false
+	c = 1
+	lastFound = 1
+
+	while done == false
+		currentChar = currentStr[c]
+		if character_is_delimiter(currentChar, wrap_delims) == true
+			TTF_SizeText(font, currentStr[startSpot:c], w, h)
+			if character_is_delimiter(currentChar, lineBreak_delims) == true		# line break
+				if lastFound == 1
+					push!(strings, currentStr[startSpot:c-1])
+					currentStr = currentStr[c+1:endSpot]
+				else
+					push!(strings, currentStr[startSpot:c-1] )	#lastFound-1])
+					currentStr = currentStr[c+1:endSpot]		#lastFound+1:endSpot]
+				end
+				endSpot = length(currentStr)
+				lastFound = 1
+				c = 0
+				TTF_SizeText(font, currentStr[1:endSpot], w, h)				# check to see if the next string is short enough
+				if 	w[] < wrapWidth
+					done = true
+					push!(strings, currentStr)
+					c = endSpot 
+				end
+			elseif w[] <= wrapWidth
+				lastFound = c
+			elseif w[] > wrapWidth
+				push!(strings, currentStr[startSpot:lastFound-1])
+				currentStr = currentStr[lastFound+1:endSpot]
+				endSpot = length(currentStr)
+				lastFound = 1
+				c = 0
+				TTF_SizeText(font, currentStr[1:endSpot], w, h)				# check to see if the next string is short enough
+				if 	w[] < wrapWidth
+					done = true
+					push!(strings, currentStr)
+					c = endSpot 
+				end
+			end
+		end
+		c += 1
+
+		if c >= endSpot
+			done = true
+			TTF_SizeText(font, currentStr[startSpot:c-1], w, h)
+			if w[] > wrapWidth
+				push!(strings, currentStr[startSpot:lastFound-1])
+				currentStr = currentStr[lastFound+1:endSpot]
+				push!(strings, currentStr)
+			end
+		end
+	end
+	
+	returnWidth = 0
+	widths = []
+	# this is written to return max width, but instead we are returning widths of each string
+	for s in strings
+		TTF_SizeText(font, s, w, h)
+		push!(widths, w[])
+		if w[] > returnWidth
+			returnWidth = w[]
+		end
+	end
+
+	returnHeight = h[] + (length(strings) - 1) * (h[] + line_space)
+	return strings, widths, returnHeight
+end
+#=
+function wrapTextBackwards(font, original::String, wrapWidth)
+
+	if wrapWidth <= 0
+		error("wrapWidth must be > 0")
+	end
+
+	strings = []
+
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	TTF_SizeText(font, original, w, h)		# Ref is used if Julia controls the memory
+	#-------------------
+	# return if string does not need to be wrapped
+	if w[] < wrapWidth
+		push!(strings, original)
+		return strings, w[], h[]
+	end
+	#-------------------
+
+	wrap_delims = [' ', '\t', '\r', '\n']
+	lineBreak_delims = ['\r', '\n']
+
+	currentStr = original
+	startSpot = 1
+	endSpot = length(original)
+	done = false
+	c = endSpot
+	while done == false
+		#for c in endSpot:-1:startSpot							# work backwards, find a delimiter, and if <, add to strings[]
+			currentChar = currentStr[c]
+			if character_is_delimiter(currentChar, wrap_delims) == true
+				TTF_SizeText(font, currentStr[startSpot:c], w, h)
+				if character_is_delimiter(currentChar, lineBreak_delims) == true		# line break
+					push!(strings, currentStr[startSpot:c-1])
+					currentStr = currentStr[c+1:endSpot]
+					endSpot = length(currentStr)
+					c = endSpot+1	
+					TTF_SizeText(font, currentStr[startSpot:c-1], w, h)				# check to see if the next string is short enough
+					if 	w[] < wrapWidth
+						done = true
+						push!(strings, currentStr)
+						c = 0 
+					end
+				elseif w[] < wrapWidth
+					push!(strings, currentStr[startSpot:c-1])
+					currentStr = currentStr[c+1:endSpot]
+					endSpot = length(currentStr)
+					c = endSpot+1
+					TTF_SizeText(font, currentStr[startSpot:c-1], w, h)				# check to see if the next string is short enough
+					if 	w[] < wrapWidth
+						done = true
+						push!(strings, currentStr)
+						c = 0 
+					end
+				end
+			end
+		c -= 1
+		#end
+		if c== 0
+			done = true
+			push!(strings, currentStr)
+		end
+	end
+	
+	return strings, w[], h[]
 
 
+end
+=#
+#=
+find delimiter. break on delimiter < length. make new string for next line.  return strings.
+
+rules: break on a delimeter
+must break on \r or \n
+
+1) scan for delims
+2)if no delim is found, find length of string.  
+	If too big:
+	a) chop at the 2nd-last char
+	b) add a hyphen
+	c) add left side to Strings
+	d) make ride side the next thing to scan
+3) if delim is < width, scan until you find the next that is not or find the end.
+
+
+wrap_delims = [' ', '\t', '\r', '\n']
+break_delims = ['\r', '\n']
+findfirst(isequal('\n'), str[tok:end])
+
+
+	Strings = []
+	done = false
+	while done = false
+
+	end
+
+	return strings, width, height
+=#
 #=
 mutable struct TextStim	#{T}
 	win::Window

@@ -97,7 +97,7 @@ mutable struct Window	#{T}
 
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 		renderer = SDL_CreateRenderer(winPtr, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
-	#	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND)
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND)
 
 		baseFilePath = pwd()
 		baseFilePath =joinpath(baseFilePath,"fonts") 

@@ -21,10 +21,10 @@ using StaticArrays
 using JET
 
 
-println("---------------------------- NEW RUN -----------------------------")
-print("\ncurrent directory: ", pwd(),"\n\n")
+#println("---------------------------- NEW RUN -----------------------------")
+#print("\ncurrent directory: ", pwd(),"\n\n")
 #cd("src")
-print("\ncurrent directory: ", pwd(),"\n\n")
+#print("\ncurrent directory: ", pwd(),"\n\n")
 include( "window.jl")
 include( "core.jl" )
 include( "shapes.jl" )
@@ -33,9 +33,11 @@ include( "events.jl" )
 include( "imageStim.jl" )
 include( "buttons.jl" )
 include( "SDL2_gfxPrimitives.jl" )
+#include( "SDL2_ttf_wrapping.jl" )
 include( "gui.jl" )
 include( "popUpMenu.jl" )
 include( "timings.jl" )
+include( "soundStim.jl" )
 
 export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec
 export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
@@ -44,12 +46,13 @@ export Rect, Ellipse, Line, Circle, ShapeStim, Polygon,  Line2
 export TextStim
 export waitKeys, getKey
 export ImageStim
-export displayMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
+export infoMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
+export alertMessage, happyMessage
 export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA
 export ButtonStim, ButtonMap, buttonDraw, buttonDrawClicked, buttonStim
 export PopUpMenu, PopUpMap
 export startTimer, stopTimer
-
+export errSound, SoundStim, play
 
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/textStim.jl

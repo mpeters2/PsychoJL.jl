@@ -52,17 +52,16 @@ mutable struct ImageStim	#{T}
 		w_ref, h_ref = Ref{Cint}(0), Ref{Cint}(0)					# These create C integer pointers: https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/
 		SDL_QueryTexture(image, C_NULL, C_NULL, w_ref, h_ref)			# get the attributes of a texture, such as width and height
 		w, h = w_ref[], h_ref[]	
-#println(w_ref[],", ",h_ref[])
+
 		#-------
-#println(typeof(win))
-#println(typeof(w_ref))
-#println(typeof(h_ref))
-		SDL_GetWindowSize(win.win, w_ref, h_ref)
-		winW, winH = w_ref[], h_ref[]
+		# change the position so that it draws at the center of the image and not the top-left
+		#pos[1] -= w÷2
+		#pos[2] -= h÷2
+
 		#-------
 		new(win, 
 			imageName,
-			[ round(Int64, winW/2), round(Int64, winH/2)],	
+			pos,	#			[ round(Int64, winW/2), round(Int64, winH/2)],	
 			image,
 			w,							# this will need to change to floats for Psychopy height coordiantes
 			h
@@ -85,10 +84,14 @@ Draws an ImageStim to the back buffer.
 function draw(theImageStim::ImageStim; magnification::Float64)
 
 	if magnification == 0
-		dest_ref = Ref(SDL_Rect(theImageStim.pos[1], theImageStim.pos[2], theImageStim.width, theImageStim.height))
+		centX = theImageStim.pos[1] - theImageStim.width÷2
+		centY = theImageStim.pos[2] - h÷2
+		dest_ref = Ref(SDL_Rect(centX, centY, theImageStim.width, theImageStim.height))
 	else
-		dest_ref = Ref(SDL_Rect(theImageStim.pos[1], 
-								theImageStim.pos[2], 
+		centX = theImageStim.pos[1] - (theImageStim.width * magnification)÷2
+		centY = theImageStim.pos[2] - (theImageStim.height * magnification)÷2
+		dest_ref = Ref(SDL_Rect(centX, 
+								centY, 
 								theImageStim.width * magnification, 
 								theImageStim.height * magnification
 								)

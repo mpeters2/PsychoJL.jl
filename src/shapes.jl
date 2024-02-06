@@ -279,7 +279,7 @@ Constructor for a Rect object
 * lineColor::Vector{Int64}......*default is (128, 128, 128)*
 * fillColor::Vector{Int64}......*default is (128, 128, 128)*
 * ori::Float64 = 0.0......*(orientation in degrees)*		
-* opacity::Int64......*(default is 255)*
+* opacity::Float......*(default is 1.0, indepenent of alpha)*
 
 **Full list of fields**
 * win::Window
@@ -306,7 +306,7 @@ mutable struct Rect	#{T}
 	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
 	fillColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
 	ori::Float64							# The orientation of the stimulus (in degrees).
-	opacity::Int64							# these will need to change to floats to handle Psychopy colors
+	opacity::Float64							# these will need to change to floats to handle Psychopy colors
 	SDLRect::SDL_Rect
 
 	#----------
@@ -319,12 +319,18 @@ mutable struct Rect	#{T}
 					lineColor::Vector{Int64} = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
 					fillColor::Vector{Int64} = fill(128, (3)),				# these will be Psychopy colors
 					ori::Float64 = 0.0,						
-					opacity::Int64 = 255							# these will need to change to floats to handle Psychopy colors
+					opacity::Float64 = 1.0							# these will need to change to floats to handle Psychopy colors
 			)
 		# NOTE: SDL uses the upper left corner.  I'm converting the to the center of the rect like Psychopy
 		centerX::Int64 = round(pos[1] - (width/2))
 		centerY::Int64 = round(pos[2] - (height/2))
 		SDLRect = SDL_Rect(centerX, centerY, width, height)
+		if length(lineColor) == 3									# will need to be changed later when other formats can be used
+			push!(lineColor, 255)
+		end
+		if length(fillColor) == 3									# will need to be changed later when other formats can be used
+			push!(fillColor, 255)
+		end		
 
 		new(win, 
 			width ,
@@ -366,15 +372,17 @@ function draw(R::Rect)
 							R.fillColor[1], 
 							R.fillColor[2], 
 							R.fillColor[3], 
-							R.opacity)
+							round(Int64, R.fillColor[4] * R.opacity ) )
 
 	SDL_RenderFillRect( R.win.renderer, Ref{SDL_Rect}(R.SDLRect))
+println("resulting alpha = ", round(Int64, R.fillColor[4] * R.opacity )," ,", R.fillColor[4]," ,", R.opacity)
+println(R.fillColor)
 	# then draw outline
 	SDL_SetRenderDrawColor(R.win.renderer, 
 							R.lineColor[1], 
 							R.lineColor[2], 
 							R.lineColor[3], 
-							R.opacity)
+							round(Int64, R.fillColor[4] * R.opacity) )
 
 	SDL_RenderDrawRect( R.win.renderer, Ref{SDL_Rect}(R.SDLRect))
 

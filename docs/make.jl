@@ -16,8 +16,10 @@ makedocs(	modules = [PsychoJL],
 				"Images" => "ImageStim.md",			
 				"Input Events" => "InputEvents.md",
 				"Shapes" => "Shapes.md",
+				"Sound" => "SoundStim.md",
 				"Text" => "TextStim.md",
 				"Timing" => "Timings.md"
+
 				#=	"Getting Started" => "start.md",
 				"Concepts" => "concepts.md",
 				"Library" => Any[
