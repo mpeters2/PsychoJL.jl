@@ -75,6 +75,31 @@ function DemoWindow()
 	#println("Id number received is", IDnumber)
 
 	myWin = Window( [2560, 1440], false)			#	2560, 1440			[1000,1000]
+	reportedSize = getSize(myWin)
+	println("getSize() Window size = ", reportedSize )
+	newColor = colorToSDL(myWin, "powderblue")
+	t1 = TextStim(myWin,  "powderblue", [100, 300], color = "powderblue")
+	t2 = TextStim(myWin,  "255, 128, 0 ,255", [100, 400], color = [255, 128, 0 ,255])
+	#t3 = TextStimExp(myWin,  "[0, 0.5, 1.0 ,1.0]", [100, 500], color = [0, 0.5, 1.0 ,1.0])
+	draw(t1)
+	draw(t2)
+
+	c1 = Circle(myWin, [2560, 1440], 200, lineWidth=1, lineColor = [127, 255, 127, 255],  fillColor = "green", fill = true)
+	draw(c1)
+
+	c2 = Circle(myWin, [reportedSize[1], reportedSize[2]], 200, lineWidth=1, lineColor = [255, 127, 127, 255],  fillColor = "red", fill = true)
+	draw(c2)
+
+	#draw(t3)
+	flip(myWin)
+	println("text color = ", newColor)
+	getKey(myWin)
+	
+	setColor(t1, "brown")
+	draw(t1)
+	flip(myWin)
+	println("text color = ", newColor)
+	getKey(myWin)
 
 	SDL_SetWindowResizable(myWin.win, SDL_TRUE)						# sets it as a resiable Window.  Scales contents when resized
 	#-------- **********************************************
@@ -237,8 +262,8 @@ end
 
 
 	myColor2 = [0, 255, 0, 255]
-	myLine2 = Line(myWin, [500, 750], [1000, 750], width = 2, lineColor = myColor2 )	# ::Vector{Int8}
-	draw(myLine2)
+#	myLine2 = Line(myWin, [500, 750], [1000, 750], width = 2, lineColor = myColor2 )	# ::Vector{Int8}
+#	draw(myLine2)
 
 
 	myColor3 = [0, 0, 255, 255]
@@ -396,7 +421,7 @@ end
 	timeTaken = stopTimer(myWin)
 	println("the key ", theKey," was pressed. It took ", timeTaken," milliseconds")
 
-	SDL_Delay(5000)
+	SDL_Delay(2000)
 	#=
 	for i in 1:10
 		println(getKey(myWin) )

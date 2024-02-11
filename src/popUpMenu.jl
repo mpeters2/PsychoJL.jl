@@ -97,10 +97,10 @@ mutable struct PopUpMenu
 		#-----
 		menuTexts::Vector{TextStim} = []
 		for i in eachindex(options)								# make text stimuli for each entry
-			popUpText = TextStim(win, options[i],	[0, 0])
+			popUpText = TextStim(win, options[i],	[0, 0]; color = txtColor)
 			#popUpText.pos = [leftTop[1] + 4 , pos[2] ]
 			popUpText.pos = [leftTop[1] + 10 , rightBottom[2]-4 ]
-			popUpText.color = txtColor
+			#popUpText.color = txtColor
 			popUpText.fontSize = 24
 			popUpText.horizAlignment = -1
 			popUpText.vertAlignment = +1

@@ -17,6 +17,7 @@ using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 using SDL2_ttf_jll
 using StaticArrays
+using Colors
 #using Documenter
 using JET
 
@@ -39,11 +40,13 @@ include( "popUpMenu.jl" )
 include( "timings.jl" )
 include( "soundStim.jl" )
 
-export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec
+export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords
+export PsychoColor, PsychoCoords
 export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
 export mouseVisible
 export Rect, Ellipse, Line, Circle, ShapeStim, Polygon,  Line2
-export TextStim
+export setColor, setLineColor, setFillColor, setPos
+export TextStim, TextStimExp, setColor
 export waitKeys, getKey
 export ImageStim
 export infoMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict

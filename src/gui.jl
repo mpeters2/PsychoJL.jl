@@ -187,7 +187,7 @@ function genericMessage( message::String, imageName::String)
 	# Play alert sound
 	parentDir = pwd()
 	filePath = joinpath(parentDir, "artifacts")
-	filePath = joinpath(filePath, "qbeep.wav")
+	filePath = joinpath(filePath, "qbeep-10db.wav")
 	mySound = SoundStim(filePath)
 	play(mySound)
 	#---------
@@ -271,46 +271,7 @@ function askQuestionDialog(message::String)
 	println("askQuestionDialog not implemented yet")
 end
 #-=============================================
-function showMessageBullshitExample(message::String)
-    buttons::SDL_MessageBoxButtonData = [						# .flags, .buttonid, .text
-        [ #= .flags, .buttonid, .text =#        0, 0, "no" ],
-        [ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "yes" ],
-        [ SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "cancel" ],
-    ]
-    colorScheme::SDL_MessageBoxColorScheme = [					# .colors (.r, .g, .b)		all this stuff was in a second set of []
-         #= .colors (.r, .g, .b) =#         
-					[ 255,   0,   0 ],							# [SDL_MESSAGEBOX_COLOR_BACKGROUND]     
-					[  0,  255,   0 ],							# [SDL_MESSAGEBOX_COLOR_TEXT]         
-					[ 255, 255,   0 ],							# [SDL_MESSAGEBOX_COLOR_BUTTON_BORDER]         
-					[   0,   0, 255 ],							# [SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND]         
-					[ 255,   0, 255 ]							# [SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED] 
-    ]
-    
-    messageboxdata::SDL_MessageBoxData = [
-					SDL_MESSAGEBOX_INFORMATION, 				# .flags 
-					C_NULL, 									# .Window 
-					"example message box",						# .title 
-					"select a button",							# .message 
-					SDL_arraysize(buttons), 					# .numbuttons 
-					buttons, 									# .buttons 
-					colorScheme 								# .colorScheme 
-    ]
-    #int buttonid;
-    if (SDL_ShowMessageBox(messageboxdata, buttonid) < 0) 
-        SDL_Log("error displaying message box");
-		println("error displaying message box")
-        return 1;
-    end
-    if (buttonid == -1) 
-        SDL_Log("no selection");
-		println("no selection")
- 
-    else
-        SDL_Log("selection was %s", buttons[buttonid].text);
-    end
-    return 0;
-end
-#-=============================================
+
 function textInputDialog( promptString::String, defaultText::String)
 	SCREEN_WIDTH = 350
 	SCREEN_HEIGHT = 150
@@ -1056,7 +1017,7 @@ function DlgFromDict(dlgDict::Dict)
 	#---------
 	# draw OK button
 	buttonList = []
-	OKtext = TextStim(dialogWin, "OK",	[0, 0])
+	OKtext = TextStim(dialogWin, "OK",	[0, 0]; color = "white")
 	OKbutton = ButtonStim(dialogWin,
 				#[ 20 + (widestKey),  10 + ((length(labels)+1) * (h[] +10)) ],		# was 0.75, buthigh dpi shenanigans
 				#[ widestKey, h[] + 10],
@@ -1071,7 +1032,7 @@ function DlgFromDict(dlgDict::Dict)
 	buttonDraw(OKbutton)
 	#---------
 	# draw Cancel button
-	Canceltext = TextStim(dialogWin, "Cancel",	[0, 0])
+	Canceltext = TextStim(dialogWin, "Cancel",	[0, 0]; color = "black")
 	CancelButton = ButtonStim(dialogWin,
 				[ round(Int64, SCREEN_WIDTH *0.5), SCREEN_HEIGHT - (h[] ÷ 2)],
 				[ (SCREEN_WIDTH ÷ 5) , h[] + 10],

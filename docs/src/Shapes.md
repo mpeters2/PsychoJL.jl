@@ -1,3 +1,4 @@
+see [Setter functions](@ref)
 ```@docs
 Circle
 Ellipse
@@ -10,6 +11,7 @@ ShapeStim
 #### draw(various shape types) - Method
 
 Draws the shape (Line, Rect, Ellipse, TextStim, etc.) into the back buffer.
+
 
 Example:
 ```julia
@@ -24,3 +26,7 @@ Example:
 	draw(newRect) 		# in PsychoPy this would have been newRect.draw()
 ```
 """
+
+```@docs
+setPos
+```

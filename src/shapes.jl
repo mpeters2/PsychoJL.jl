@@ -15,8 +15,17 @@ draw(myRectJL)
 
 export Rect, Ellipse, draw
 export Line, Circle, ShapeStim, Polygon, Line2
+export setColor, setLineColor, setFillColor, setPos
 
+#=
+new functions needed:
 
+SetColor
+SetPos
+
+also for images
+
+=#
 
 #-==================================================================
 """
@@ -29,24 +38,26 @@ Constructor for a Line object
   * startPoint::Vector{Int64}\n
   * endPoint::Vector{Int64}\n
   * width::Int64				
-  * lineColor::Vector{Int64}\n
+  * lineColor::PsychoColor\n
 **Outputs:** None
 
-**Methods:** draw()
+**Methods:** 
+* draw()
 """
 mutable struct Line	
 	win::Window
 	startPoint::Vector{Int64}
 	endPoint::Vector{Int64}
 	width::Int64							# this will need to change to floats for Psychopy height coordiantes
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
+	_lineColor::Vector{Int64}
 
 	#----------
 	function Line(	win::Window,
 					startPoint::Vector{Int64} = [0,0],
 					endPoint::Vector{Int64} = [10,10];
 					width::Int64 = 1,
-					lineColor::Vector{Int64} = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
+					lineColor::PsychoColor = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
 		#			opacity::Int64 = 255							# these will need to change to floats to handle Psychopy colors
 			)
 	# might want to add length and orientation
@@ -59,11 +70,14 @@ mutable struct Line
 			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
 			error(message)
 		end		
+
+		_lineColor = colorToSDL(win, lineColor)
 		new(win, 
 			startPoint,
 			endPoint,
 			width,
-			convert(Vector{Int64},lineColor),
+			lineColor,
+			_lineColor
 			)
 
 	end
@@ -101,6 +115,15 @@ function draw(L::Line)
 	end
 
 #	drawStartPoint(L.win.renderer,L.startPoint[1] ,L.startPoint[2] )
+end
+#-==========================
+"""
+	setColor(::Line, ::Union{String, Vector{Int64}, Vector{Int64})
+
+Used to update the color of a Line object.
+"""
+function setColor(line::Line, color::PsychoColor)
+	line._lineColor = colorToSDL(line.win, color)
 end
 #-==========================
 
@@ -145,6 +168,8 @@ mutable struct Line2
 			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
 			error(message)
 		end		
+
+		lineColor = colorToSDL(win, lineColor)
 		new(win, 
 			startPoint,
 			endPoint,
@@ -199,33 +224,7 @@ mutable struct Line2
 
 end
 #----------
-function ConvertPsychoPyToFloatCoords(coord::Vector{Int64})
-	x = coord[1] + 0.5
-	y = -coord[2] + 0.5
 
-	return [x,y]
-end
-#----------
-function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Int64})
-	_, displayHeight = getSize(win)
-	x = coord[1] * displayHeight
-	y = -coord[2] * displayHeight
-
-	return [x,y]
-end
-#----------
-function ConvertPsychoPyToPixels(win::Window, coord::Vector{Int64})
-	coord = ConvertPsychoPyToFloatCoords(coord)
-	return ConvertFloatCoordsToPixels(win, coord)
-end
-#----------
-# This (the name) makes no sense!  Do not write code late at night!
-function convertFloatCoordToInt255(coords::Vector{Float64})
-	out = ones(Int64, 2)
-	out[1] = round(Int64, coords[1] * 255)
-	out[2] = round(Int64, coords[2] * 255)
-	return out
-end
 #----------
 function draw(L::Line2)
 
@@ -260,6 +259,7 @@ function draw(L::Line2)
 
  
 end
+
 #-=====================================================================================================
 # Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.
 """
@@ -276,8 +276,8 @@ Constructor for a Rect object
 **Optional constructor inputs:**
 * units::String......*(default is "pixel"*
 * lineWidth::Int64......*(default is 1)*
-* lineColor::Vector{Int64}......*default is (128, 128, 128)*
-* fillColor::Vector{Int64}......*default is (128, 128, 128)*
+* lineColor::PsychoColor......*default is (128, 128, 128)*
+* fillColor::PsychoColor......*default is (128, 128, 128)*
 * ori::Float64 = 0.0......*(orientation in degrees)*		
 * opacity::Float......*(default is 1.0, indepenent of alpha)*
 
@@ -288,50 +288,61 @@ Constructor for a Rect object
 * pos::Vector{Int64}
 * units::String
 * lineWidth::Int64					
-* lineColor::Vector{Int64}		
-* fillColor::Vector{Int64}			
+* lineColor::PsychoColor		
+* fillColor::PsychoColor			
 * ori::Float64							
 * opacity::Int64							
 * SDLRect::SDL_Rect
 
-**Methods:** draw()
+**Methods:** 
+* draw()
+* setLineColor()
+* setFillColor()
+* setPos()
 """
 mutable struct Rect	#{T}
 	win::Window
 	width::Int64							# this will need to change to floats for Psychopy height coordiantes
 	height::Int64
-	pos::Vector{Int64}
+	pos::PsychoCoords
 	units::String
 	lineWidth::Int64						# this will need to change to floats for Psychopy height coordiantes
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
-	fillColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
+	fillColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 	ori::Float64							# The orientation of the stimulus (in degrees).
 	opacity::Float64							# these will need to change to floats to handle Psychopy colors
 	SDLRect::SDL_Rect
+	_lineColor::Vector{Int64}
+	_fillColor::Vector{Int64}
+	_pos::Vector{Int64}
 
 	#----------
 	function Rect(	win::Window,
 					width::Int64 = 1,
 					height::Int64 = 1,
-					pos::Vector{Int64} = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED];		# position
+					pos::PsychoCoords = [10,10];		# position
 					units::String = "pixel",
 					lineWidth::Int64 = 1,
-					lineColor::Vector{Int64} = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
-					fillColor::Vector{Int64} = fill(128, (3)),				# these will be Psychopy colors
+					lineColor::PsychoColor = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
+					fillColor::PsychoColor = fill(128, (3)),				# these will be Psychopy colors
 					ori::Float64 = 0.0,						
 					opacity::Float64 = 1.0							# these will need to change to floats to handle Psychopy colors
 			)
 		# NOTE: SDL uses the upper left corner.  I'm converting the to the center of the rect like Psychopy
 		centerX::Int64 = round(pos[1] - (width/2))
 		centerY::Int64 = round(pos[2] - (height/2))
-		SDLRect = SDL_Rect(centerX, centerY, width, height)
+		_pos = [ centerX, centerY]
+		SDLRect = SDL_Rect(_pos[1], _pos[2], width, height)
+		_lineColor = colorToSDL(win, lineColor)
+		_fillColor = colorToSDL(win, fillColor)
+		#=
 		if length(lineColor) == 3									# will need to be changed later when other formats can be used
 			push!(lineColor, 255)
 		end
 		if length(fillColor) == 3									# will need to be changed later when other formats can be used
 			push!(fillColor, 255)
 		end		
-
+		=#
 		new(win, 
 			width ,
 			height,
@@ -342,7 +353,10 @@ mutable struct Rect	#{T}
 			fillColor,				# these will be Psychopy colors
 			ori,						
 			opacity,							# these will need to change to floats to handle Psychopy colors
-			SDLRect					# SDL rectangle object
+			SDLRect,					# SDL rectangle object
+			_lineColor,
+			_fillColor,
+			_pos
 			)
 
 	end
@@ -369,25 +383,24 @@ Example:
 function draw(R::Rect)
 	# first draw filled Rect
 	SDL_SetRenderDrawColor(R.win.renderer, 
-							R.fillColor[1], 
-							R.fillColor[2], 
-							R.fillColor[3], 
-							round(Int64, R.fillColor[4] * R.opacity ) )
+							R._fillColor[1], 
+							R._fillColor[2], 
+							R._fillColor[3], 
+							round(Int64, R._fillColor[4] * R.opacity ) )
 
-	SDL_RenderFillRect( R.win.renderer, Ref{SDL_Rect}(R.SDLRect))
-println("resulting alpha = ", round(Int64, R.fillColor[4] * R.opacity )," ,", R.fillColor[4]," ,", R.opacity)
-println(R.fillColor)
+ 	SDL_RenderFillRect( R.win.renderer, Ref{SDL_Rect}(R.SDLRect))
+#println("resulting alpha = ", round(Int64, R._fillColor[4] * R.opacity )," ,", R._fillColor[4]," ,", R.opacity)
+#println(R._fillColor)
 	# then draw outline
 	SDL_SetRenderDrawColor(R.win.renderer, 
-							R.lineColor[1], 
-							R.lineColor[2], 
-							R.lineColor[3], 
-							round(Int64, R.fillColor[4] * R.opacity) )
+							R._lineColor[1], 
+							R._lineColor[2], 
+							R._lineColor[3], 
+							round(Int64, R._lineColor[4] * R.opacity) )
 
 	SDL_RenderDrawRect( R.win.renderer, Ref{SDL_Rect}(R.SDLRect))
 
 end
-
 
 #-=====================================================================================================
 """
@@ -401,22 +414,30 @@ Constructor for an Ellipse object
 * rx::Int64 ......*horizontal radius*  
 * ry::Int64 ......*vertical radius*
 * lineWidth::Int64				
-* lineColor::Vector{Int64}
-* fillColor::Vector{Int64}
+* lineColor::PsychoColor
+* fillColor::PsychoColor
 * fill::Bool ......*fill or not*
 **Outputs:** None
-**Methods:** draw()
+**Methods:** 
+* draw
+* setLineColor()
+* setFillColor()
+* setPos()
 """
 mutable struct Ellipse
 	win::Window
-	pos::Vector{Int64}
-	rx::Int64							# Horizontal radius in pixels of the aa-ellipse
-	ry::Int64							# vertical radius in pixels of the aa-ellipse
+	pos::PsychoCoords
+	rx::Union{Int64, Float64}							# Horizontal radius in pixels of the aa-ellipse
+	ry::Union{Int64, Float64}							# vertical radius in pixels of the aa-ellipse
 	lineWidth::Int64
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
-	fillColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
+	fillColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 	fill::Bool							# these will need to change to floats to handle Psychopy colors
-
+	_lineColor::Vector{Int64}
+	_fillColor::Vector{Int64}
+	_pos::Vector{Int64}
+	_rx::Int64
+	_ry::Int64
 
 
 	#aaellipseRGBA
@@ -424,14 +445,27 @@ mutable struct Ellipse
 #MethodError: no method matching Ellipse(::Window, ::Vector{Int64}, ::Int64, ::Int64, ::Int64, ::Vector{Int64}, ::Vector{Int64}, ::Bool)
 #								 Ellipse(::Window, ::Vector{Int64}, ::Int64, ::Int64; lineWidth, lineColor, fillColor, fill)
 	function Ellipse(win::Window,
-					pos::Vector{Int64} = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED],		# position
-					rx::Int64 = 20,						# Horizontal radius in pixels of the aa-ellipse
-					ry::Int64 = 10;						# vertical radius in pixels of the aa-ellipse
+					pos::PsychoCoords = [10,10],		# position
+					rx::Union{Int64, Float64} = 20,						# Horizontal radius in pixels of the aa-ellipse
+					ry::Union{Int64, Float64} = 10;						# vertical radius in pixels of the aa-ellipse
 					lineWidth::Int64 = 1,
-					lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
-					fillColor::Vector{Int64} = fill(128, (4)),				# these will be Psychopy colors
+					lineColor::PsychoColor = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+					fillColor::PsychoColor = fill(128, (4)),				# these will be Psychopy colors
 					fill::Bool = false
 			)
+		_lineColor = colorToSDL(win, lineColor)
+		_fillColor = colorToSDL(win, fillColor)
+
+		if win.coordinateSpace != "LT_Pix"
+			_, displayHeight = getSize(win)								# get true height of window
+			_rx = round(Int64, rx * displayHeight)								# convert percent to pixels
+			_ry = round(Int64, ry * displayHeight)								# convert percent to pixels
+			_pos = SDLcoords(win, pos)
+		else
+			_rx = rx
+			_ry = ry
+			_pos = pos
+		end
 
 		new(win, 
 			pos,
@@ -440,51 +474,57 @@ mutable struct Ellipse
 			lineWidth,
 			lineColor,				# these will need to change to floats to handle Psychopy colors
 			fillColor,				# these will be Psychopy colors
-			fill
+			fill,
+			_lineColor,
+			_fillColor,
+			_pos,
+			_rx,
+			_ry
 			)
 	end
 end
 #----------
-
+#MethodError: Cannot `convert` an object of type Int64 to an object of type Vector{Int64}
+#Ellipse(win::Window, pos::Vector{Float64}, rx::Int64, ry::Int64; lineWidth::Int64, lineColor::String, fillColor::Vector{Float64}, fill::Bool)
 
 function draw(El::Ellipse)
 
 	if El.fill == true
 		aaFilledEllipseRGBA(El.win.renderer, 
-							El.pos[1], 
-							El.pos[2],  
-							El.rx, 
-							El.ry, 
-							El.fillColor[1], 
-							El.fillColor[2], 
-							El.fillColor[3], 
-							El.fillColor[4])
+							El._pos[1], 
+							El._pos[2],  
+							El._rx, 
+							El._ry, 
+							El._fillColor[1], 
+							El._fillColor[2], 
+							El._fillColor[3], 
+							El._fillColor[4])
 	# I need to check if linecolor exists or has an alpha>0, and then draw the outline
-		_aaellipseRGBA(El.win.renderer,El.pos[1], El.pos[2], El.rx, El.ry, El.lineColor, El.fill)
+		_aaellipseRGBA(El.win.renderer,El._pos[1], El._pos[2], El._rx, El._ry, El._lineColor, El.fill)
 	end
 	if El.lineWidth > 1
 		# we need to anti-alias the outside.  When thickness is >1, radius increases by thickness / 2	
 		# outside antialias first
-		newrX = El.rx + (El.lineWidth ÷ 2) #-1
-		newrY = El.ry + (El.lineWidth ÷ 2) -1
-		_aaellipseRGBA(El.win.renderer,El.pos[1]-1, El.pos[2], newrX, newrY, El.lineColor, El.fill)
+		newrX = El._rx + (El.lineWidth ÷ 2) #-1
+		newrY = El._ry + (El.lineWidth ÷ 2) -1
+		_aaellipseRGBA(El.win.renderer,El._pos[1]-1, El._pos[2], newrX, newrY, El.lineColor, El.fill)
 		thickEllipseRGBA(El.win.renderer,
-							El.pos[1], 
-							El.pos[2],  
-							El.rx, 
-							El.ry, 
-							El.lineColor[1], 
-							El.lineColor[2], 
-							El.lineColor[3], 
-							El.lineColor[4],
+							El._pos[1], 
+							El._pos[2],  
+							El._rx, 
+							El._ry, 
+							El._lineColor[1], 
+							El._lineColor[2], 
+							El._lineColor[3], 
+							El._lineColor[4],
 							El.lineWidth)
 		# inside antialias first
-		newrX = El.rx - (El.lineWidth ÷ 2) #+1
-		newrY = El.ry - (El.lineWidth ÷ 2) 
-		_aaellipseRGBA(El.win.renderer,El.pos[1]-1, El.pos[2], newrX, newrY, El.lineColor, El.fill)
+		newrX = El._rx - (El.lineWidth ÷ 2) #+1
+		newrY = El._ry - (El.lineWidth ÷ 2) 
+		_aaellipseRGBA(El.win.renderer,El._pos[1]-1, El._pos[2], newrX, newrY, El._lineColor, El.fill)
 
 	else
-		_aaellipseRGBA(El.win.renderer,El.pos[1], El.pos[2], El.rx, El.ry, El.lineColor, El.fill)
+		_aaellipseRGBA(El.win.renderer,El._pos[1], El._pos[2], El._rx, El._ry, El._lineColor, El.fill)
 	end
 	# below is my lame way of drawing a filled ellipse inside an anti-aliased ellipse
 	# in reality, I show modify aaelipse fill
@@ -510,32 +550,51 @@ Constructor for an Circle object
 * pos::Vector{Int64}   
 * rad::Int64 ......*radius* 
 * lineWidth::Int64				
-* lineColor::Vector{Int64}
-* fillColor::Vector{Int64}
+* lineColor::PsychoColor
+* fillColor::PsychoColor
 * fill::Bool ......*fill or not*
 **Outputs:** None
-**Methods:** draw()
+**Methods:** 
+* draw()
+* setLineColor()
+* setFillColor()
+* setPos()
+
+
 """
 mutable struct Circle
 	win::Window
-	pos::Vector{Int64}
-	rad::Int64							# radius in pixels of the aa-ellipse
+	pos::PsychoCoords	
+	rad::Union{Int64, Float64}							# radius in pixels of the aa-ellipse
 	lineWidth::Int64
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
-	fillColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
+	fillColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 	fill::Bool							# these will need to change to floats to handle Psychopy colors
 	circlesEllipse::Ellipse
-
+	_lineColor::Vector{Int64}
+	_fillColor::Vector{Int64}
+	_pos::Vector{Int64}
+	_rad::Int64
 
 	function Circle(win::Window,
-					pos::Vector{Int64} = [SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED],		# position
-					rad::Int64 = 20;						# Horizontal radius in pixels of the aa-ellipse
+					pos::PsychoCoords = [10,10],		# position
+					rad::Union{Int64, Float64} = 20;						# Horizontal radius in pixels of the aa-ellipse
 					lineWidth::Int64 = 1,
-					lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
-					fillColor::Vector{Int64} = fill(128, (4)),				# these will be Psychopy colors
+					lineColor::PsychoColor = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+					fillColor::PsychoColor = fill(128, (4)),				# these will be Psychopy colors
 					fill::Bool = false
 			)
 
+		_lineColor = colorToSDL(win, lineColor)
+		_fillColor = colorToSDL(win, fillColor)
+		if win.coordinateSpace != "LT_Pix"
+			_, displayHeight = getSize(win)								# get true height of window
+			_rad = round(Int64, rad * displayHeight)								# convert percent to pixels
+			_pos = SDLcoords(win, pos)
+		else
+			_rad = rad
+			_pos = pos
+		end
 		circlesEllipse = Ellipse(win, pos, rad, rad, lineWidth=lineWidth,lineColor=lineColor,fillColor=fillColor, fill=fill)
 
 		new(win, 
@@ -545,7 +604,11 @@ mutable struct Circle
 			lineColor,				# these will need to change to floats to handle Psychopy colors
 			fillColor,				# these will be Psychopy colors
 			fill,
-			circlesEllipse
+			circlesEllipse,
+			_lineColor,
+			_fillColor,
+			_pos,
+			_rad
 			)
 	end
 end
@@ -553,7 +616,6 @@ end
 
 
 function draw(Circ::Circle)
-
 	draw(Circ.circlesEllipse)
 end
 #-=====================================================================================================
@@ -571,7 +633,7 @@ Constructor for a ShapeStim object, which is a polygon defined by vertices.
 **Optional constructor inputs:**
 * units::String......*(default is "pixel"*
 * lineWidth::Int64......*(default is 1)*
-* lineColor::Vector{Int64}......*default is (128, 128, 128)*
+* lineColor::PsychoColor......*default is (128, 128, 128)*
 
 **Full list of fields**
 * win::Window
@@ -580,16 +642,17 @@ Example:
 *[ [300, 10], [400, 5], [410,150], [320, 100] ,[290, 20] ]*
 * units::String
 * lineWidth::Int64					
-* lineColor::Vector{Int64}		
+* lineColor::PsychoColor		
 
-**Methods:** draw()
+**Methods:** 
+* draw()
 """
 mutable struct ShapeStim	#{T}
 	win::Window
 	vertices::Vector{Vector{Int64}}			#Vector{Int64}
 	units::String
 	lineWidth::Int64						# this will need to change to floats for Psychopy height coordiantes
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 
 
 	#----------
@@ -597,10 +660,10 @@ mutable struct ShapeStim	#{T}
 						vertices::Vector{Vector{Int64}} = [[10,10]];		# a single vertex placeholder
 						units::String = "pixel",
 						lineWidth::Int64 = 1,
-						lineColor::Vector{Int64} = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
+						lineColor::PsychoColor = fill(128, (4)),				# these will need to change to floats to handle Psychopy colors
 			)
 
-
+		lineColor = colorToSDL(win, lineColor)		
 		new(win, 
 			vertices,
 			units,
@@ -688,7 +751,7 @@ Constructor for a regular Polygon object, such as a pentagon or hexagon.
 **Optional constructor inputs:**
 * units::String......*(default is "pixel"*
 * lineWidth::Int64......*(default is 1)*
-* lineColor::Vector{Int64}......*default is (128, 128, 128)*
+* lineColor::PsychoColor......*default is (128, 128, 128)*
 
 **Full list of fields**
 * win::Window,
@@ -697,9 +760,10 @@ Constructor for a regular Polygon object, such as a pentagon or hexagon.
 * sides::Int64
 * units::String
 * lineWidth::Int64					
-* lineColor::Vector{Int64}		
+* lineColor::PsychoColor		
 
-**Methods:** draw()
+**Methods:** 
+* draw()
 """
 mutable struct Polygon	#{T}
 	win::Window
@@ -708,7 +772,7 @@ mutable struct Polygon	#{T}
 	sides::Int64
 	units::String
 	lineWidth::Int64						# this will need to change to floats for Psychopy height coordiantes
-	lineColor::Vector{Int64}			# these will need to change to floats to handle Psychopy colors
+	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 
 
 	#----------
@@ -718,10 +782,10 @@ mutable struct Polygon	#{T}
 						sides::Int64 = 5;
 						units::String = "pixel",
 						lineWidth::Int64 = 1,
-						lineColor::Vector{Int64} = fill(128, (4))				# these will need to change to floats to handle Psychopy colors
+						lineColor::PsychoColor = fill(128, (4))				# these will need to change to floats to handle Psychopy colors
 			)
 
-
+		lineColor = colorToSDL(win, lineColor)
 		new(win, 
 			pos,
 			rad,
@@ -800,8 +864,47 @@ function draw(P::Polygon)
 	end	
 
 end
+#-==========================
+"""
+	setLineColor(various shape types, color)
+
+Sets the outline color for various solid shapes (Rect, Ellipse, Circle, etc.).
+
+NEED link to colors
+```
+"""
+function setLineColor(solidShape::Union{Rect, Ellipse, Circle}, color::PsychoColor)
+	solidShape._lineColor = colorToSDL(rect.win, color)
+end
+#-==========
+"""
+	setFillColor(various shape types, color)
+
+Sets the fill color for various solid shapes (Rect, Ellipse, Circle, etc.) 
+
+NEED link to colors
+```
+"""
+function setFillColor(solidShape::Union{Rect, Ellipse, Circle}, color::PsychoColor)
+	solidShape._fillColor = colorToSDL(rect.win, color)
+end
 
 #-=====================================================================================================
+"""
+	setPos(solidShape::Union{Rect, Ellipse, Circle, Polygon}, coordinates)
+
+Set the position of the object, usually the center unless specified otherwise. 
+
+See "Setter Functions" in side tab for more information.
+"""
+function setPos(solidShape::Union{Rect, Ellipse, Circle, Polygon}, coords::PsychoCoords)
+	solidShape._pos = SDLcoords(solidShape.win, coords)
+	solidShape.pos = coords
+	if typeof(solidShape) == Circle
+		solidShape.circlesEllipse._pos = solidShape._pos			# update the ellipse owned by the circle
+		solidShape.circlesEllipse.pos = solidShape.pos			# update the ellipse owned by the circle
+	end
+end
 #-======================================================================================================================
 
 #-======================================================================================================================

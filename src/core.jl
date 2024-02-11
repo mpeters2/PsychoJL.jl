@@ -1,12 +1,15 @@
 # Translation of psycopy window file to Julia
 
-export InitPsychoJL, MakeInt8Color, waitTime, waitTimeMsec
-
+export InitPsychoJL, MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords
+export PsychoColor, PsychoCoords
+using Colors
 
 #using SimpleDirectMediaLayer
 #using SimpleDirectMediaLayer.LibSDL2
 
 
+PsychoColor = Union{String, Vector{Int64}, Vector{Float64}}
+PsychoCoords = Union{ Vector{Int64}, Vector{Float64}}
 
 
 #----------
@@ -73,9 +76,11 @@ when making the Window.
 """
 function waitTime(win::Window, time::Float64)
 	if win.timeScale == "milliseconds"
-		SDL_Delay(time)		
+		SDL_Delay( round(UInt32, time)	)	
 	elseif win.timeScale == "seconds"
-		SDL_Delay(time * 1000)	
+		SDL_Delay(  round(UInt32, time * 1000)	)
+	else
+		error("Invalid timescale: ", win.timeScale)
 	end
 end
 #-=================================================
@@ -108,3 +113,124 @@ function dec2hex255(number)
 	end
 	return hex
 end
+#-=====================================================================================================
+# Changes various types of colors to standard SDL RGB color with an alpha channel
+
+# RGB.  Adds alpha channel if length < 4
+function colorToSDL(win::Window, inColor::Vector{Int64})
+
+	if win.colorSpace != "rgba255" && win.colorSpace != "rgb255"
+		error("Mismatch between colorspace.  Given integer vector, but colorspace is ", win.colorSpace)
+	end
+	
+	if length(inColor) == 4
+		return inColor
+	elseif length(inColor) == 3
+		outColor = zeros(Int64, 4)
+		for i in eachindex(inColor)
+			outColor[i] = inColor[i]
+		end
+		outColor[4] = 255
+		return outColor
+	else
+		error("color is too short.  Only ", length(inColor)," values given")
+	end
+end
+#-------------------------
+# below tranlates decimal (0.0-1.0) and PsychoPy (-1.0 - +1.0) to rgba255
+function colorToSDL(win::Window, inColor::Vector{Float64})
+
+	if win.colorSpace != "decimal" && win.colorSpace != "PsychoPy"
+		error("Mismatch between colorspace.  Given float vector, but colorspace is ", win.colorSpace)
+	end
+	#-----
+	if win.colorSpace == "decimal"
+		outColor = zeros(Int64, 4)
+		for i in eachindex(inColor)
+			outColor[i] = round(Int64, inColor[i] * 255)
+		end
+		if length(inColor) == 3
+			outColor[4] = 255			# default is alpha of 255
+		elseif length(inColor) < 3
+			error("color is too short.  Only ", length(inColor)," values given")
+		end
+	elseif win.colorSpace == "PsychoPy"
+		outColor = zeros(Int64, 4)
+		for i in eachindex(inColor)
+			outColor[i] = round(Int64, 127.5 + (inColor[i] * 127.5) )
+		end
+		if length(inColor) == 3
+			outColor[4] = 255			# default is alpha of 255
+		elseif length(inColor) < 3
+			error("color is too short.  Only ", length(inColor)," values given")
+		end
+	else
+		error(win.colorSpace," is an invalid color space")
+	end
+	return outColor
+end
+#-------------------------
+# below tranlates strings to rgba255.  Ignores color space, and translates 
+function colorToSDL(win::Window, inColor::String)
+
+	if haskey(Colors.color_names, inColor)
+		theColor = Colors.color_names[inColor]				# color is an rgba255
+		outColor = zeros(Int64, 4)
+		for i in eachindex(theColor)						# have to convert tuple to vector
+			outColor[i] = theColor[i]
+		end
+		if length(theColor) == 3							# add alpha if necessary
+			outColor[4] = 255
+		end
+		return outColor
+	else
+		error("Color name ", inColor," could not be found in Colors.jl")
+	end
+
+end
+#-====================================================
+function SDLcoords(win::Window, coords::Union{Vector{Int64}, Vector{Float64}})
+	if win.coordinateSpace == "LT_Pix"
+		return coords
+	elseif win.coordinateSpace == "LT_Percent"			# origin is left top, width is percent of height
+		return ConvertFloatCoordsToPixels(win, coords)
+	elseif win.coordinateSpace == "LB_Percent"			# origin is left bott0m, width is percent of height
+		x = coords[1]
+		y = 1 - coords[2]
+		return ConvertFloatCoordsToPixels(win, [x,y])
+	elseif win.coordinateSpace == "PsychoPy"			# origin is left bott0m, width is percent of height
+		return ConvertPsychoPyToPixels(win, coords)
+	else
+		error("Invalid coordinate space given: ", win.coordinateSpace)
+	end
+end
+#----------
+function ConvertPsychoPyToFloatCoords(coord::Vector{Float64})
+	x = coord[1] + 0.5
+	y = -coord[2] + 0.5
+
+	return [x,y]
+end
+#----------
+function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Float64})
+	_, displayHeight = getSize(win)
+	x = round(Int64, coord[1] * displayHeight)
+	y = round(Int64, coord[2] * displayHeight)
+
+	return [x,y]
+end
+#----------
+function ConvertPsychoPyToPixels(win::Window, coord::Vector{Float64})
+	coord = ConvertPsychoPyToFloatCoords(coord)
+	return ConvertFloatCoordsToPixels(win, coord)
+end
+#----------
+# This (the name) makes no sense!  Do not write code late at night!
+function convertFloatCoordToInt255(coords::Vector{Float64})
+	out = ones(Int64, 2)
+	out[1] = round(Int64, coords[1] * 255)
+	out[2] = round(Int64, coords[2] * 255)
+	return out
+end
+
+

@@ -38,7 +38,9 @@ mutable struct ButtonStim
 
 		TextStim.pos[1] = pos[1] * 2		# high dpi	
 		TextStim.pos[2] = pos[2] * 2		# high dpi
-		
+		outlineColor = colorToSDL(win, outlineColor)
+		fillColor = colorToSDL(win, fillColor)
+
 		new(win, 
 			pos,
 			size,

@@ -41,7 +41,7 @@ Constructor for a Window object
   * fullScreen::Bool
   * timeScale::String .......*defaults is milliseconds.  Other option is seconds*
   * title::String
-  *  startTime::Float64 .......*global proximy for startTime() and stopTime()*
+  * startTime::Float64 .......*global proximy for startTime() and stopTime()*
 
 **Methods:**
   * closeAndQuitPsychoJL()
@@ -58,8 +58,8 @@ mutable struct Window	#{T}
 	size::MVector{2, Int64}		# window size; static array (stay away from tuples)
 	pos::MVector{2, Int64}		# position
 	color::MVector{3, Int64}			# these will be Psychopy colors
-	colorSpace::String				# might need to revist for colors.jl
-	coordinateSpace::String		#	LT_Pix, LT_Percent, PsychoPy
+	colorSpace::String				# rgb255, rgba255, decimal, PsychoPy
+	coordinateSpace::String		#	LT_Pix, LT_Percent, LB_Percent, PsychoPy
 	renderer::Ptr{SDL_Renderer}
 	font::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
 	boldFont::Ptr{SimpleDirectMediaLayer.LibSDL2._TTF_Font}
@@ -81,8 +81,9 @@ mutable struct Window	#{T}
 					title = "Window"
 				)
 		winPtr = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size[1], size[2], SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI )#| SDL_WINDOW_INPUT_GRABBED)
+		#winPtr = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size[1], size[2], SDL_WINDOW_SHOWN)# | SDL_WINDOW_ALLOW_HIGHDPI )#| SDL_WINDOW_INPUT_GRABBED)
 
-		if timeScale != "seconds" || timeScale != "milliseconds"
+		if timeScale != "seconds" && timeScale != "milliseconds"
 			println("* timeScale can only be 'seconds' or 'milliseconds'.")
 			println("** ", timeScale, " was given as the value for timeScale.")
 			println("* default to milliseconds for timing.")
@@ -94,7 +95,9 @@ mutable struct Window	#{T}
 		screenWidth = displayInfo[].w
 		screenHeight = displayInfo[].h
 		pos = [screenWidth ÷ 2, screenHeight ÷ 2]
-
+println("screenWidth = ", screenWidth)
+println("screenHeight = ", screenHeight)
+println("asked for window size = ", size)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 		renderer = SDL_CreateRenderer(winPtr, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND)
@@ -103,10 +106,6 @@ mutable struct Window	#{T}
 		baseFilePath =joinpath(baseFilePath,"fonts") 
 		baseFilePath =joinpath(baseFilePath,"Roboto") 
 		fontFilePath =joinpath(baseFilePath,"Roboto-Regular.ttf") 
-
-	#	baseFilePath =joinpath(baseFilePath,"Noto_Serif")
-	#	fontFilePath =joinpath(baseFilePath,"NotoSerif-VariableFont_wdth,wght.ttf")
-		#	font = 	TTF_OpenFont("/Users/MattPetersonsAccount/Documents/Development/Julia/PsychoJL/sans.ttf", 24);
 
 		font = 	TTF_OpenFont(fontFilePath, 30);
 
@@ -149,34 +148,8 @@ mutable struct Window	#{T}
 		SDL_PumpEvents()					# this erases whatever random stuff was in the backbuffer
 		SDL_RenderClear(renderer)			# <<< Had to do this to clear out the noise.
 		#---------
-		# We're using this to partially clear the keyboard event queue to help the debouncing routines
-		#SDLevent = Ref{SDL_Event}()									#Event handler
-		#event_ref = SDLevent
-		#evt = event_ref[]
-		#evt_ty = evt.type
-		#evt_ty = SDL_KEYDOWN
-		# ERROR: type SDL_Event has no field type
-		# pEvent := &sdl.UserEvent{sdl.USEREVENT, sdl.GetTicks(), id, 1331, nil, nil}
-		# myEvent := &sdl.UserEvent{sdl.SDL_KeyboardEvent, sdl.GetTicks(), id, 1331, nil, nil}
-		#=
-		SDL_Event ev;
-		ev.type = userType;
-
-		ev.user.code = someEvtCode;
-		ev.user.data1 = &someData;
-		ev.user.data2 = 0;
-
-		SDL_PushEvent(&ev);
-		-------------
-		SDLevent.type = 
-		
-		event_ref = event
-		evt = event_ref[]
-		evt_ty = evt.type
-		evt.type = SDL_KEYDOWN
-		event[].type = SDL_KEYDOWN
-		=#
-#		SDL_PushEvent(event)
+	
+	
 		firstKey = true
 		#---------
 		new(winPtr, 

@@ -1,4 +1,4 @@
-export draw, TextStim
+export draw, TextStim, TextStimExp, setColor
 
 
 #-================================================================================================================
@@ -16,7 +16,7 @@ Constructor for a TextStim object
   * textMessage::String.........*default = "future text"*
   * pos::Vector{Int64}........*position: default  = [10,10]*
 **Optional constructor inputs:**
-  * color::Vector{Int64}.........*default = (128, 128, 128)*
+  * color::PsychoColor.........*default = (128, 128, 128)*
   * fontName::String = "",
   * fontSize::Int64 = 12,.........*default = 12*
   * scale::Float64 = 1.0,.........*not the same as font size*
@@ -38,7 +38,7 @@ mutable struct TextStim	#{T}
 	win::Window
 	textMessage::String							# this will need to change to floats for Psychopy height coordiantes
 	pos::Vector{Int64}	
-	color::Vector{Int64}					# these will need to change to floats to handle Psychopy colors
+	color::PsychoColor					# Union of strings, and float and int vectors
 	fontName::String						
 	fontSize::Int64
 	scale::Float64
@@ -47,12 +47,13 @@ mutable struct TextStim	#{T}
 	vertAlignment::Int64					# -1 aligns at top, 0 for center, +1 aligns at bottom
 	style::String							# bold, italic, etc.
 	orientation::Int64
+	_color::Vector{Int64}
 
 	#----------
 	function TextStim(win::Window,				
 					textMessage::String =  "future text",
 					pos::Vector{Int64} = [10,10];
-					color::Vector{Int64} = fill(128, (3)),			# these will need to change to floats to handle Psychopy colors
+					color::PsychoColor = "white",			# these will need to change to floats to handle Psychopy colors
 					fontName::String = "",
 					fontSize::Int64 = 12,
 					scale::Float64 = 1.0,
@@ -60,14 +61,15 @@ mutable struct TextStim	#{T}
 					horizAlignment::Int64 = -1,
 					vertAlignment::Int64 = +1,
 					style::String = "normal",
-					orientation::Int64 = 0
+					orientation::Int64 = 0,
+					_color::Vector{Int64} = fill(128, (4))							# internal SDL color 
 					)
 		if fontName == ""
 			font = win.font
 		else
 			println("*** Notice: have not implemented loading from system fonts yet")
 		end
-
+		_color = colorToSDL(win, color)
 
 		new(win, 
 			textMessage ,
@@ -80,7 +82,8 @@ mutable struct TextStim	#{T}
 			horizAlignment,
 			vertAlignment,
 			style,
-			orientation
+			orientation,
+			_color
 			)
 
 	end
@@ -100,14 +103,14 @@ Draws an TextStim to the back buffer.
  *  wrapLength::Int64......*in pixels (for now)*
 """
 function draw(text::TextStim; wrapLength::Int64 = -1)	
-	if length(text.color) == 4
-		color = SDL_Color(text.color[1], text.color[2] , text.color[3], text.color[4])
-	elseif length(text.color) == 3
-		color = SDL_Color(text.color[1], text.color[2] , text.color[3], 255)
+	if length(text._color) == 4
+		_color = SDL_Color(text._color[1], text._color[2] , text._color[3], text._color[4])
+	elseif length(text._color) == 3
+		_color = SDL_Color(text._color[1], text._color[2] , text._color[3], 255)
 	else
 		println("Error in draw(textStim): colors too short, should have length of 3 or 4")
-		println("Length = ", length(text.color))
-		println("Values = ", text.color)
+		println("Length = ", length(text._color))
+		println("Values = ", text._color)
 	end
 	#-------------------
 	if text.style == "normal"
@@ -123,7 +126,7 @@ function draw(text::TextStim; wrapLength::Int64 = -1)
 	
 	#---------
 	if wrapLength == -1
-		surfaceMessage = TTF_RenderUTF8_Blended(text.font, text.textMessage, color)		# text.win.font
+		surfaceMessage = TTF_RenderUTF8_Blended(text.font, text.textMessage, _color)		# text.win.font
 		Message = SDL_CreateTextureFromSurface(text.win.renderer, surfaceMessage);
 	#else
 	#	surfaceMessage = TTF_RenderUTF8_Blended_Wrapped(text.font, text.textMessage, color, wrapLength)
@@ -195,7 +198,7 @@ function draw(text::TextStim; wrapLength::Int64 = -1)
 			SDL_RenderCopy(text.win.renderer, Message, C_NULL, Ref{SDL_Rect}(Message_rect) );		# &Message_rect)
 		else
 			for s in 1:length(strings)			# loop through the sub-strings of wrapped text.
-				surfaceMessage = TTF_RenderUTF8_Blended(text.font, strings[s], color)		# text.win.font
+				surfaceMessage = TTF_RenderUTF8_Blended(text.font, strings[s], _color)		# text.win.font
 				Message = SDL_CreateTextureFromSurface(text.win.renderer, surfaceMessage)
 
 			
@@ -213,6 +216,22 @@ function draw(text::TextStim; wrapLength::Int64 = -1)
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(Message);
 end
+#----------
+"""
+	setColor(text::TextStim; color::Union{String, Vector{Int64}, Vector{Float64}})
+
+Update the textStim's color
+
+**Inputs:**
+ * text::TextStim
+ * color is a string, Vector of integers, or vector of floats.
+ NEED A LINK TO THE COLORS PAGE
+
+"""
+function setColor(text::TextStim, color::PsychoColor)
+	text._color = colorToSDL(text.win, color)
+end
+
 #----------
 function setSize(text::TextStim, fontSize::Int64)
 	println("setSize(::TextStim, fontsize) is a future placeholder for loading a font of the specific size")
@@ -482,3 +501,59 @@ end
 
 
 =#
+
+
+
+mutable struct TextStimExp
+	win::Window
+	textMessage::String							# this will need to change to floats for Psychopy height coordiantes
+	pos::Vector{Int64}	
+	color::PsychoColor					# these will need to change to floats to handle Psychopy colors
+	fontName::String						
+	fontSize::Int64
+	scale::Float64
+	font::Ptr{TTF_Font}
+	horizAlignment::Int64					# -1 for left, 0 for center, +1 for right
+	vertAlignment::Int64					# -1 aligns at top, 0 for center, +1 aligns at bottom
+	style::String							# bold, italic, etc.
+	orientation::Int64
+
+	#----------
+	function TextStimExp(win::Window,				
+					textMessage::String =  "future text",
+					pos::Vector{Int64} = [10,10];
+					color::PsychoColor = fill(128, (3)),			# these will need to change to floats to handle Psychopy colors
+					fontName::String = "",
+					fontSize::Int64 = 12,
+					scale::Float64 = 1.0,
+					font::Any = nothing,											# font is for internal use and is a pointer to a TTF
+					horizAlignment::Int64 = -1,
+					vertAlignment::Int64 = +1,
+					style::String = "normal",
+					orientation::Int64 = 0
+					)
+		if fontName == ""
+			font = win.font
+		else
+			println("*** Notice: have not implemented loading from system fonts yet")
+		end
+		color = colorToSDL(win, color)
+
+		new(win, 
+			textMessage ,
+			pos,
+			color,
+			fontName,
+			fontSize,
+			scale,
+			font,				# these will need to change to floats to handle Psychopy colors
+			horizAlignment,
+			vertAlignment,
+			style,
+			orientation
+			)
+
+	end
+end
+
+#----------
