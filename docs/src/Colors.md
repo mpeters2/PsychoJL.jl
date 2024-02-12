@@ -6,7 +6,7 @@ For example:
 	myWin = Window( [2560, 1440], false, colorSpace = "rgba255")
 ```
 
-#### Colorspaces:
+#### Colorspaces
 
 `rgb255`	red, green, and blue values from 0 to 255. Alpha (opacity) is assumed to be 255 (100%)
   * black = [0,0,0]
@@ -27,7 +27,7 @@ For example:
 \
 Internally, all of these colors will be translated to rgba255 so that they work with SDL (the cross-platform graphics engine that PsychoJL uses).
 
-#### Colorspaces
+##### Color fields
 Because of the color conversions, you should not access color fields directly.  Internally, the color you set is translated to
 an SDL color and saved in another variable, which is the variable used for drawing.
 
@@ -38,9 +38,9 @@ myText = TextStim(myWin,  "Using a TextStim", [100, 100], color = [255, 255, 128
 ```
 Example using `setColor()`
 ```julia 
-setColor(myText,  color, "red")
+setColor(myText, "red")
 ```
-DOES THAT WORK?  CAN I ACCESS FIELDS LIKE THAT?  IF SO, I NEED AN EXAMPLE USING A RECT WHICH HAS LINE AND BACKGROUND COLORS
+see [Color setting functions](@ref)
 
 #### Colors in PsychoJL
 Shapes and TextStim use PsychoColor as their color Type.
@@ -52,11 +52,13 @@ Vectors of Int64 (from 0-255) and Vectors of Float 64 (either -1.0...+1.0, or 0.
 
 You can pass a string, an integer vector, or a floating point vector as a color.  Keep in mind that the values you pass must
 be legal in the color space.  For example, if you set the color space to `rgba255` and try to set the color using a floating
-point vector, it will cause an error.\
+point vector, it will throw an error.\
+\
 Strings are legal in all cases.
 
 ##### When the color space is rgb255 or rgba255...
-String inputs will be accepted (see [Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl)) for a list of color names.
+String inputs will be accepted (see [Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl) for a list of color names).\
+\
 Integer Vectors with a length of 3 (RGB) or a length of 4 (RGBA) will also be accepted.  If the length is 3, alpha (opacity) is assumed to be 255 (100%).
 
 Example:
@@ -72,11 +74,15 @@ Example:
 ```
 
 ##### When the color space is decimal or PsychoPy...
-String inputs will be accepted (see [Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl)) for a list of color names.
-Float Vectors need a length of 4 (RGBA). How they are interpreted depeneds on the color space.
+String inputs will be accepted (see [Colors.jl](https://github.com/JuliaGraphics/Colors.jl/blob/master/src/names_data.jl) for a list of color names).\
+\
+Float Vectors need a length of 4 (RGBA). How they are interpreted depends on the color space.
 
 If the color space is `decimal`, a value of 0.0 is considered 'black' (in that color channel), and 0.5 is considered gray (50% in that channel).
-On the other hand, if the color space is `PsychoPy`, -1.0 s considered 'black' (in that color channel), and 0.0 is considered gray (50% in that channel).
+On the other hand, if the color space is `PsychoPy`, -1.0 s considered 'black' (in that color channel), 0.0 is considered gray (50% in that channel),
+and +1.0 is considered white (100% in that channel).
+
+see [Colorspaces](@ref) for example values.
 
 Example:
 ```julia
