@@ -12,7 +12,7 @@ PsychoJL has several diferent coordinate systems available.
  The size of the dimensions are determined by the size of your window.  All units are in integers (Int64).
 
 
-!["picture of an LT_Pix screen"](../assets/LT_Pix.png)
+!["picture of an LT_Pix screen"](assets/LT_Pix.png)
 
  ##### Note on fullscreen mode
 
@@ -28,7 +28,7 @@ PsychoJL has several diferent coordinate systems available.
  In the example below, the aspect ratio is 1.7778:1 (2560 x 1440).
  All units are floating point (Float64).
 
- !["picture of an LT_Percent screen"](../assets/LT_Percent.png)
+ !["picture of an LT_Percent screen"](assets/LT_Percent.png)
 
  ---
   ### LB_Percent
@@ -38,7 +38,7 @@ PsychoJL has several diferent coordinate systems available.
  In the example below, the aspect ratio is 1.7778:1 (2560 x 1440).
  All units are floating point (Float64).
 
- !["picture of an LB_Percent screen"](../assets/LB_Percent.png)
+ !["picture of an LB_Percent screen"](assets/LB_Percent.png)
  
  ---
   ### Psychopy
@@ -48,5 +48,6 @@ PsychoJL has several diferent coordinate systems available.
  In the example below, the aspect ratio is 1.7778:1 (2560 x 1440).
  All units are floating point (Float64).
 
- !["picture of an PsychoPy screen"](../assets/PsychoPy.png)
+ !["picture of an PsychoPy screen"](./assets/PsychoPy.png)
  ---
+ https://github.com/mpeters2/PsychoJL.jl/blob/main/docs/src/assets/Psychopy.png
