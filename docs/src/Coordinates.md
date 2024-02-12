@@ -48,13 +48,13 @@ PsychoJL has several diferent coordinate systems available.
  In the example below, the aspect ratio is 1.7778:1 (2560 x 1440).
  All units are floating point (Float64).
 
- !["picture of an PsychoPy screen"](assets/PsychoPy.png)
+ 
  ---
  ### https://github.com/mpeters2/PsychoJL.jl/blob/main/docs/src/assets/Psychopy.png
 
 
 ```
-
+!["picture of an PsychoPy screen"](assets/PsychoPy.png)
 docs/src/showcase.md
  ![Enter a descriptive caption for the image](assets/logo.png)
 
