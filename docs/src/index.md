@@ -82,7 +82,7 @@ to calculate the elapsed time.
 
 ##### Variable Typing
 
-Like Python, Julia can infer variables types. However, Julia can be faster when it does not need to infer types.  For example,
+Like Python, Julia can infer variables' types. However, Julia can be faster when it does not need to infer types.  For example,
 the parameter for this function is perfectly legal (from a syntactic point of view):
 
 ```julia
@@ -91,7 +91,7 @@ function fancyMath(myArray)
 	return answer
 end
 ```
-But, is even better, because it explicitely states the parameter's type:
+But, this is even better, because it explicitely states the parameter's type:
 
 ```julia
 function fancyMath(myArray::Vector{Float64})
@@ -102,7 +102,9 @@ end
 
 As you might have noticed by the documentation, PsychoJL is strongly typed.  Future versions, through
 multiple-dispatch (i.e. overloading) will be less strict with their types. For example, for the `startPoint`
-and `endPoint`, `Line()` requires a vector of two integers.  In the future, it will allow vectors of floats.
+and `endPoint`, `Line()` requires a vector of two integers.  In the future, it will allow vectors of floats. [edit: the future is here!]
+
+##### Integer Division
 
 When dividing variables that should remain integers, Julia's integer division operand `÷` (not `/`!) is 
 extremely useful. Dividing integers using the standard division operand `\` can return a float. For example:
@@ -118,7 +120,7 @@ julia> x = 255 / 2
 ```
 Integer division truncates.  In other situations `round(Int64, x)` might make more sense.
 
-###### Integer Division
+
 
 ## Usage Rules
 
@@ -168,23 +170,8 @@ pie-wedges\n
 
 ## Known issues
 
-### Color
-Currently, color is r,g,b, alpha, with values from 0-255.  Planned color spaces include:
-
-• 0.0 ... 1.0: (Float64)
-
-• -1.0 ... +1.0: (Float64) PsychoPy style color
-
-• Strings: "red", "brown", "gray", etc.
-
-### Coordinate system
-Currently, the origin is in the top-left and measurements are in pixels. Planned coordinate systems include:
-
-• Percentage of height: origin is in the top left, and x and y coordinates are a percentage of screen height.
-	On a 2560 x 1440, the bottom right coordinate would be ( 1.78, 1.0)
-
-• Psychopy "height": origin is in the center of the screen.  Negative y-values are below the origin, and positive are above the origin.
-	On a 2560 x 1440, the top left coordinate would be (-0.89,+0.50), and the bottom right coordinate would be (+0.89,-0.50)
+### Manual
+The manual is a work in progress, and needs reorganization.
 
 ### Timescales
 The default timescale is `milliseconds`, but `seconds` is also an option.
@@ -197,5 +184,5 @@ the image is smaller than expected.
 ## Technology
 
 All graphics and input are handled by SDL.jl.  I translated parts of SDL2_gfxPrimitives from
-C to Julia, with some code replaced with more efficient algorithms.
+C to Julia, with some code replaced with more efficient algorithms (and sometimes I couldn't figure out the orignal C code!).
 
