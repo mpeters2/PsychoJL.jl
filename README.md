@@ -1,4 +1,4 @@
-# PsychoJL
+# PsychExpAPIs (aka PsychoJL)
 
 PsychoJL is a module for writing psychology and psychophysics experiments.  The general framework 
 and style is inspired by PsychoPy, but there has been no collaboration with the authors of PsychoPy.
