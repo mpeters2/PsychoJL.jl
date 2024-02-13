@@ -29,7 +29,7 @@ For example:
  Example:
 ```julia
 
-using PsychoJL
+using PsychExpAPIs
 # Moving Ball Exampile
 #-=============================
 function main()

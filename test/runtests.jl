@@ -1,6 +1,6 @@
-using PsychoJL
+using PsychExpAPIs
 using Test
 
-@testset "PsychoJL.jl" begin
+@testset "PsychExpAPIs.jl" begin
     # Write your tests here.
 end

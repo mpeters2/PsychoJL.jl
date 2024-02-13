@@ -135,7 +135,7 @@ Integer division truncates.  In other situations `round(Int64, x)` might make mo
 The function 
 
 ```julia
-using PsychoJL
+using PsychExpAPIs
 
 function DemoWindow()
 	InitPsychoJL()

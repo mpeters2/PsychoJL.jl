@@ -8,7 +8,7 @@
 =#
 
 println("\n----------------------------- NEW RUN ------------------------------\n")
-using PsychoJL
+using PsychExpAPIs
 using Random
 using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2

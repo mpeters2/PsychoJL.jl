@@ -1,4 +1,4 @@
-using PsychoJL
+using PsychExpAPIs
 using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 # Moving Ball Exampile

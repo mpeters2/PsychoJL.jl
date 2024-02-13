@@ -1,7 +1,7 @@
 # code for testing the PsychoJL module during development
 # working prototype should be abale to draw square, circle, text, pictures and get keyboard input
 println("------------------------------------ starting new run --------------------------------------")
-using PsychoJL
+using PsychExpAPIs
 using SimpleDirectMediaLayer
 using SimpleDirectMediaLayer.LibSDL2
 using SDL2_ttf_jll
