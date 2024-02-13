@@ -420,7 +420,14 @@ end
 	theKey = waitKeys(myWin, 5000)
 	timeTaken = stopTimer(myWin)
 	println("the key ", theKey," was pressed. It took ", timeTaken," milliseconds")
-
+	#--------------
+	for x in 300:100:500
+		setPos(myImage, [x, 400])
+		draw(myImage, magnification = 10.0)
+		waitTime(myWin, 100.0)
+		flip(myWin)
+	end
+	#-----------
 	SDL_Delay(2000)
 	#=
 	for i in 1:10

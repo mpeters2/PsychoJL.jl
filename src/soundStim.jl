@@ -1,4 +1,4 @@
-export errSound, SoundStim, play
+export ErrSound, SoundStim, play
 
 
 """
@@ -13,7 +13,7 @@ Constructor for a SoundStim object
 
 **Methods:** play()
 """
-mutable struct SoundStim	
+struct SoundStim	
 	filePath::String
 	soundData::Ptr{Mix_Chunk}
 
@@ -23,12 +23,32 @@ mutable struct SoundStim
 	if isfile(filePath)
 		soundData = Mix_LoadWAV_RW(SDL_RWFromFile(filePath, "rb"), 1)
 	else
-		error("$fileName not found")
+		error("$filePath not found")
 	end
-	
-
 
 		new(filePath, 
+			soundData
+			)
+
+	end
+end
+#----------
+struct ErrSound	
+	soundData::Ptr{Mix_Chunk}
+
+	#----------
+	function ErrSound()
+
+	parentDir = pwd()
+	filePath = joinpath(parentDir, "artifacts")
+	filePath = joinpath(filePath, "ErrSound-10db.wav")					
+	if isfile(filePath)
+		soundData = Mix_LoadWAV_RW(SDL_RWFromFile(filePath, "rb"), 1)
+	else
+		error("ErrSound() $filePath not found")
+	end
+
+		new(
 			soundData
 			)
 
@@ -46,7 +66,7 @@ Plays a SoundStim
 
 **Outputs:** None
 """
-function play(S::SoundStim; repeats::Int64 = 0)
+function play(S::Union{SoundStim, ErrSound}; repeats::Int64 = 0)
 
 	Mix_PlayChannel(-1, S.soundData, repeats)
 	#no method matching unsafe_convert(::Type{Ptr{Mix_Chunk}}, ::typeof(errSound))
@@ -59,7 +79,7 @@ end
 
 # play(loops=None,
 
-function errSound()
+function testSound()
 	#if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 1024) < 0)
 	#	println("SDL_mixer could not initialize!", Mix_GetError())
 	#end

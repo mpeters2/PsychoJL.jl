@@ -55,7 +55,7 @@ export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, 
 export ButtonStim, ButtonMap, buttonDraw, buttonDrawClicked, buttonStim
 export PopUpMenu, PopUpMap
 export startTimer, stopTimer
-export errSound, SoundStim, play
+export ErrSound, SoundStim, play
 
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/testStim.jl
 #/Users/MattPetersonsAccount/.julia/dev/PsychoJL/src/textStim.jl

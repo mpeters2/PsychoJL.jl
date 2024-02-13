@@ -27,17 +27,17 @@ width and height are automatically calculated during ImageStim construction.
 mutable struct ImageStim	#{T}
 	win::Window
 	imageName::String
-	pos::Vector{Int64}
+	pos::PsychoCoords
 	image::Ptr{SDL_Texture}
 	width::Int64							# this will need to change to floats for Psychopy height coordiantes
 	height::Int64
-
+	_pos::Vector{Int64}	
 #	opacity::Int64							# these will need to change to floats to handle Psychopy colors
 
 	#----------
 	function ImageStim(	win::Window,
 					imageName::String,
-					pos = [20,20];						# just far enough to be visible
+					pos::PsychoCoords = [20,20];						# just far enough to be visible
 					width = 0,							# this will need to change to floats for Psychopy height coordiantes
 					height = 0
 		#			opacity::Int64 = 255							# these will need to change to floats to handle Psychopy colors
@@ -52,7 +52,7 @@ mutable struct ImageStim	#{T}
 		w_ref, h_ref = Ref{Cint}(0), Ref{Cint}(0)					# These create C integer pointers: https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/
 		SDL_QueryTexture(image, C_NULL, C_NULL, w_ref, h_ref)			# get the attributes of a texture, such as width and height
 		w, h = w_ref[], h_ref[]	
-
+		_pos = SDLcoords(win, pos)
 		#-------
 		# change the position so that it draws at the center of the image and not the top-left
 		#pos[1] -= w÷2
@@ -64,7 +64,8 @@ mutable struct ImageStim	#{T}
 			pos,	#			[ round(Int64, winW/2), round(Int64, winH/2)],	
 			image,
 			w,							# this will need to change to floats for Psychopy height coordiantes
-			h
+			h,
+			_pos
 			)
 	end
 end
@@ -84,12 +85,12 @@ Draws an ImageStim to the back buffer.
 function draw(theImageStim::ImageStim; magnification::Float64)
 
 	if magnification == 0
-		centX = theImageStim.pos[1] - theImageStim.width÷2
-		centY = theImageStim.pos[2] - h÷2
+		centX = theImageStim._pos[1] - theImageStim.width÷2
+		centY = theImageStim._pos[2] - h÷2
 		dest_ref = Ref(SDL_Rect(centX, centY, theImageStim.width, theImageStim.height))
 	else
-		centX = theImageStim.pos[1] - (theImageStim.width * magnification)÷2
-		centY = theImageStim.pos[2] - (theImageStim.height * magnification)÷2
+		centX = theImageStim._pos[1] - (theImageStim.width * magnification)÷2
+		centY = theImageStim._pos[2] - (theImageStim.height * magnification)÷2
 		dest_ref = Ref(SDL_Rect(centX, 
 								centY, 
 								theImageStim.width * magnification, 
@@ -100,4 +101,17 @@ function draw(theImageStim::ImageStim; magnification::Float64)
 #	dest_ref[] = SDL_Rect(theImageStim.pos[1], theImageStim.pos[2], theImageStim.width, theImageStim.height)
 #println(theImageStim.pos[1],", ",theImageStim.pos[2],", ",theImageStim.width,", ",theImageStim.height)
 	SDL_RenderCopy(theImageStim.win.renderer, theImageStim.image, C_NULL, dest_ref)	
+end
+#-----------------------
+"""
+	 setPos(image::ImageStim, coords::, coordinates)
+
+Set the position of the image, usually the center unless specified otherwise. 
+
+See "Setter Functions" in side tab for more information.
+"""
+function setPos(image::ImageStim, coords::PsychoCoords)
+	image._pos = SDLcoords(image.win, coords)
+	image.pos = coords
+
 end

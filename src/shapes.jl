@@ -14,7 +14,7 @@ draw(myRectJL)
 =#
 
 export Rect, Ellipse, draw
-export Line, Circle, ShapeStim, Polygon, Line2
+export Line, Circle, ShapeStim, Polygon
 export setColor, setLineColor, setFillColor, setPos
 
 #=
@@ -141,6 +141,7 @@ function getLineLength(L::Line)
 	return sqrt( ((L.startPoint[1] - L.endPoint[1]) ^2)  + ((L.startPoint[2] - L.endPoint[2])^2) )
 end
 #-=====================================================================================================
+#=
 #- Line2 experiments with using multiple dispatch for coordinate systems
 mutable struct Line2	
 	win::Window
@@ -259,7 +260,7 @@ function draw(L::Line2)
 
  
 end
-
+=#
 #-=====================================================================================================
 # Floating point version shelved for now, as you can not do multiple dispatch with optional arguments.
 """

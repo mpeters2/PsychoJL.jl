@@ -26,11 +26,12 @@ mutable struct ExperimentDesign	 	# we'll pass this around instead of globals
 	trialTP::Vector{Int64}		  	# Target Presence
 	randomOrder::Vector{Int64}	  	# this will hold the random order in which the trials will be displayed.
 end
+
+
 #-----
 function main()
 	global subjInfo
 	global subjID
-	
 
 	InitPsychoJL()
 	subjID = getSubjectInfo()
@@ -116,7 +117,7 @@ function shutDown(win::Window, subjFile::IOStream)
 	mouseVisible(true)
 	setFullScreen(win, false)
 	hideWindow(win)
-	displayMessage( "Thank-you for particpating")
+	happyMessage( "Thank-you for participating")
 	closeAndQuitPsychoJL(win)
 	println("post closeAndQuitPsychoJL")
 end
@@ -125,7 +126,7 @@ function openDataFile(subjID::String)
 	fileName = "subj" * subjID * ".txt"
 	println(pwd())
 	println(fileName)
-	while isfile(fileName) == true
+	while isfile(fileName) == true && subjID != "999"
 		message = fileName * " already exists!"
 		displayMessage( message)
 		subjID = getSubjectInfo()
@@ -138,6 +139,15 @@ end
 #-============================================================================
 # We'll make the target a left or right rotated T among rotated Ls
 function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, subjFile::IOStream, realOrPractice::Bool = true)
+
+	#---------
+	# make an ErrSound object
+	errSound = ErrSound()							
+	# NOTE: Ideally you would not do this here, because it 
+	#	(1) creates a sound object and loads a sound file
+	#	(2) destroys the sound object after each trial
+	# however, it probably does not have an effect on performance.
+
 
 	theTrial = trialInfo.randomOrder[trialNum]		# get our randomized trial number
 
@@ -213,6 +223,8 @@ function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, sub
 		accuracy = 1
 	elseif keypressed == "7"								# secret abort key
 		shutDown(win, subjFile)
+	else
+		play(errSound)
 	end
 	#------
 	if realOrPractice == true					# do not save practice data
@@ -294,7 +306,7 @@ function getSubjectInfo()
 	
 		# check if the filename is valid (length <= 8 & no special char)
 		fileName = "subj" * subjID * ".txt"
-		if isfile(fileName) == true
+		if isfile(fileName) == true && subjID != "999"			# 999 is my demo subject
 			message = fileName * " already exists!"
 			displayMessage( message)
 			#subjID = getSubjectInfo()
