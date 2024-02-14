@@ -390,23 +390,23 @@ end
 	x = round(Int64, winSize[2]/2)
 	widthRatio = winSize[1]/winSize[2]
 
-	expLine1 = Line2(myWin, [x, 0], [x, winSize[1]], width = 1, lineColor = [255,0,0,255] )		# int coordinates
-	#expLine2 = Line2(myWin, [0.98, 0.0], [0.98, 1.0], width = 1, lineColor = [0,255,0,255] )		# float coordinates
+	expLine1 = Line(myWin, [x, 0], [x, winSize[1]], width = 1, lineColor = [255,0,0,255] )		# int coordinates
+	#expLine2 = Line(myWin, [0.98, 0.0], [0.98, 1.0], width = 1, lineColor = [0,255,0,255] )		# float coordinates
 
 #	green is much too short 
 #	and red does not show up at all.
 	draw(expLine1)
 
-	expLine2 = Line2(myWin, [0.0, 0.02], [widthRatio, 0.02], width = 1, lineColor = [0,255,255,255] )		# float coordinates
-	draw(expLine2)
-	expLine2 = Line2(myWin, [0.0, 0.98], [widthRatio, 0.98], width = 1, lineColor = [0,255,255,255] )		# float coordinates
-	draw(expLine2)
+#	expLine2 = Line(myWin, [0.0, 0.02], [widthRatio, 0.02], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+#	draw(expLine2)
+#	expLine2 = Line(myWin, [0.0, 0.98], [widthRatio, 0.98], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+#	draw(expLine2)
 
 
-	expLine2 = Line2(myWin, [0.02, 0.00], [0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
-	draw(expLine2)
-	expLine2 = Line2(myWin, [widthRatio - 0.02, 0.0], [widthRatio - 0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
-	draw(expLine2)
+#	expLine2 = Line(myWin, [0.02, 0.00], [0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+#	draw(expLine2)
+#	expLine2 = Line(myWin, [widthRatio - 0.02, 0.0], [widthRatio - 0.02, 1.0], width = 1, lineColor = [0,255,255,255] )		# float coordinates
+#	draw(expLine2)
 
 	message = @sprintf("width ratio = %4.2f",  widthRatio)
 	myText = TextStim(myWin,  message, [100, 300], color = [0, 255, 255, 255])

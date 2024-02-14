@@ -46,16 +46,18 @@ Constructor for a Line object
 """
 mutable struct Line	
 	win::Window
-	startPoint::Vector{Int64}
-	endPoint::Vector{Int64}
+	startPoint::PsychoCoords
+	endPoint::PsychoCoords
 	width::Int64							# this will need to change to floats for Psychopy height coordiantes
 	lineColor::PsychoColor			# these will need to change to floats to handle Psychopy colors
 	_lineColor::Vector{Int64}
-
+	_startPoint::Vector{Int64}
+	_endPoint::Vector{Int64}
 	#----------
+
 	function Line(	win::Window,
-					startPoint::Vector{Int64} = [0,0],
-					endPoint::Vector{Int64} = [10,10];
+					startPoint::PsychoCoords = [0,0],
+					endPoint::PsychoCoords = [10,10];
 					width::Int64 = 1,
 					lineColor::PsychoColor = fill(128, (3)),				# these will need to change to floats to handle Psychopy colors
 		#			opacity::Int64 = 255							# these will need to change to floats to handle Psychopy colors
@@ -70,14 +72,18 @@ mutable struct Line
 			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
 			error(message)
 		end		
-
+		_startPoint = SDLcoords(win, startPoint)
+		_endPoint = SDLcoords(win, endPoint)
 		_lineColor = colorToSDL(win, lineColor)
+
 		new(win, 
 			startPoint,
 			endPoint,
 			width,
 			lineColor,
-			_lineColor
+			_lineColor,
+			_startPoint,
+			_endPoint
 			)
 
 	end
@@ -87,28 +93,28 @@ function draw(L::Line)
 
 	if L.width == 1							# draw a single anti-aliased line
 		WULinesAlpha(L.win, 
-						convert(Float64, L.startPoint[1]), 
-						convert(Float64, L.startPoint[2]), 
-						convert(Float64, L.endPoint[1]), 
-						convert(Float64, L.endPoint[2]),
-						convert(UInt8, L.lineColor[1]),
-						convert(UInt8, L.lineColor[2]),
-						convert(UInt8, L.lineColor[3]),
-						convert(UInt8, L.lineColor[4])
+						convert(Float64, L._startPoint[1]), 
+						convert(Float64, L._startPoint[2]), 
+						convert(Float64, L._endPoint[1]), 
+						convert(Float64, L._endPoint[2]),
+						convert(UInt8, L._lineColor[1]),
+						convert(UInt8, L._lineColor[2]),
+						convert(UInt8, L._lineColor[3]),
+						convert(UInt8, L._lineColor[4])
 					)
 
 	else											
 		# If we were really cool, we would center even lines by somehow antialiasing the sides
 		# in order to make the lines look centered at the start point instead of offset.
 		WULinesAlphaWidth(L.win, 
-						convert(Float64, L.startPoint[1]), 
-						convert(Float64, L.startPoint[2]), 
-						convert(Float64, L.endPoint[1]), 
-						convert(Float64, L.endPoint[2]),
-						convert(UInt8, L.lineColor[1]),
-						convert(UInt8, L.lineColor[2]),
-						convert(UInt8, L.lineColor[3]),
-						convert(UInt8, L.lineColor[4]),
+						convert(Float64, L._startPoint[1]), 
+						convert(Float64, L._startPoint[2]), 
+						convert(Float64, L._endPoint[1]), 
+						convert(Float64, L._endPoint[2]),
+						convert(UInt8, L._lineColor[1]),
+						convert(UInt8, L._lineColor[2]),
+						convert(UInt8, L._lineColor[3]),
+						convert(UInt8, L._lineColor[4]),
 						L.width
 					)
 

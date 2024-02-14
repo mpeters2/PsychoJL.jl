@@ -1,11 +1,11 @@
-using Documenter, PsychoJL
+using Documenter, PsychExpAPIs
 using Dates
 
 
 println("------------------ NEW MAKE ------------------")
 println("----- ", now())
-makedocs(	modules = [PsychoJL],
-			sitename="PsychoJL.jl",
+makedocs(	modules = [PsychExpAPIs],
+			sitename="PsychExpAPIs.jl",
 			checkdocs=:none,
 
 			pages = [
@@ -46,7 +46,7 @@ makedocs(	modules = [PsychoJL],
 
 		)
 deploydocs(
-    repo    = "github.com/mpeters2/PsychoJL.jl.git",
+    repo    = "github.com/mpeters2/PsychExpAPIs.jl.git",
     target  = "build",
     deps    = nothing,
     make    = nothing

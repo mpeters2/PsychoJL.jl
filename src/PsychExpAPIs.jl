@@ -1,5 +1,5 @@
 " Module for writing Psychology Experiments inspired by Psychopy"
-module PsychoJL
+module PsychExpAPIs
 
 # need to make an alignment option for all widgets, like I did with textStim.
 

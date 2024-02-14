@@ -190,6 +190,7 @@ function colorToSDL(win::Window, inColor::String)
 end
 #-====================================================
 function SDLcoords(win::Window, coords::Union{Vector{Int64}, Vector{Float64}})
+println(">>>>>>>>> ", win.coordinateSpace)
 	if win.coordinateSpace == "LT_Pix"
 		return coords
 	elseif win.coordinateSpace == "LT_Percent"			# origin is left top, width is percent of height
