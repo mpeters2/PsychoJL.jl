@@ -41,8 +41,20 @@ draw(stim)
 Notice that Julia does not use the Object.method() syntax of Python.  Instead, the stimulus is passed
 to the draw() function.
 
+Python: `object.function(param)`
+Julia: `function(object, param)`
+
+Examples:
+```python
+myImage.setPos( (0.0, 0.0) )
+```
+```julia
+setPos(myImage, [0.0, 0.0])			# assuming you are using PsychoPy coordinates
+```
+
+
 In addition, Julia objects are really structures (data) with a constructor function of the same name. 
-For example, I can make a new `TextStim` using the `TextStim()` constructor function, and latter change
+For example, I can make a new `TextStim` using the `TextStim()` constructor function, and later change
 one of its properties using dot notation.
 
 ```julia
