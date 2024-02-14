@@ -41,7 +41,7 @@ draw(stim)
 Notice that Julia does not use the Object.method() syntax of Python.  Instead, the stimulus is passed
 to the draw() function.
 
-Python: `object.function(param)`
+Python: `object.function(param)`\
 Julia: `function(object, param)`
 
 Examples:
