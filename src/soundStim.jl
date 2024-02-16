@@ -1,6 +1,6 @@
 export ErrSound, SoundStim, play
 
-
+#When modules are loaded, if they have a function called __init__ it will be called. Does that help? NO
 """
 	SoundStim()
 

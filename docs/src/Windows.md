@@ -1,3 +1,15 @@
+# Windows
+* Objects
+  - [`Window`](@ref)
+* Functions
+  - [`closeAndQuitPsychoJL(win::Window)`](@ref)
+  - [`closeWinOnly(win::Window)`](@ref)
+  - [`flip(win::Window)`](@ref)
+  - [`getPos(win::Window)`](@ref)
+  - [`getSize(win::Window)`](@ref)
+  - [`hideWindow(win::Window)`](@ref)
+  - [`mouseVisible(visibility::Bool)`](@ref)
+  - [`setFullScreen(win::Window, mode::Bool)`](@ref)
 ```@docs
 Window
 closeAndQuitPsychoJL(win::Window)

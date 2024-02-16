@@ -41,7 +41,7 @@ draw(stim)
 Notice that Julia does not use the Object.method() syntax of Python.  Instead, the stimulus is passed
 to the draw() function.
 
-Python: `object.function(param)`
+Python: `object.function(param)`\
 Julia: `function(object, param)`
 
 Examples:
@@ -184,6 +184,9 @@ pie-wedges\n
 
 ### Manual
 The manual is a work in progress, and needs reorganization.
+
+### Calibration
+At this time, no physical testing has taken place.
 
 ### Timescales
 The default timescale is `milliseconds`, but `seconds` is also an option.

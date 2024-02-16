@@ -369,6 +369,7 @@ mutable struct Rect	#{T}
 	end
 end
 #----------
+#	draw(various shape types)
 """
 	draw(various shape types)
 

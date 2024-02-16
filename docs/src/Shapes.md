@@ -1,3 +1,14 @@
+# Shapes
+* Objects
+  - [`Circle`](@ref)
+  - [`Ellipse`](@ref)
+  - [`Line`](@ref)
+  - [`Polygon`](@ref)
+  - [`Rect`](@ref)
+  - [`ShapeStim`](@ref)
+* Functions
+  - [`draw(various stimuli)`](@ref manualDrawHeader)
+  - [`setPos()`](@ref manualSetPosHeader)
 see [Setter functions](@ref)
 ```@docs
 Circle
@@ -6,12 +17,14 @@ Line
 Polygon
 Rect
 ShapeStim
-```
 
-#### draw(various shape types) - Method
+```
+---
+
+## [draw(various shape types)](@id manualDrawHeader)
+
 
 Draws the shape (Line, Rect, Ellipse, TextStim, etc.) into the back buffer.
-
 
 Example:
 ```julia
@@ -25,8 +38,25 @@ Example:
 			)
 	draw(newRect) 		# in PsychoPy this would have been newRect.draw()
 ```
-"""
 
-```@docs
-setPos
+---
+## [setPos()](@id manualSetPosHeader)
+
+
+Set the position of the object, usually the center unless specified otherwise. 
+Example moves an image rightward by 100 pixels per frame, starting at 300 and ending at 500 pixels:
+```julia
+	for x in 300:100:500
+		setPos(myImage, [x, 400])
+		draw(myImage)
+		waitTime(myWin, 100.0)
+		flip(myWin)
+	end
+```
+
+	See [Setter functions](@ref) for more information.
+
+
+\
+```@index
 ```

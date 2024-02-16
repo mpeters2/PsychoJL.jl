@@ -21,7 +21,7 @@ For example:
  * where the stimulusType is Rect, Ellipse, or Circle
 
 ### Position setting functions
- see [Coordinate systems](@ref)
+ see [Coordinate systems](@ref) and [`setPos()`](@ref manualSetPosHeader)
 
  Because coordinates may need to be translated to another coordinate system, you should use the `setPos()` function
  to update your stimulus' position.  The example code below draws a circle, and updates its position periodically.
