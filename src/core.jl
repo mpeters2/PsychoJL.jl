@@ -85,7 +85,7 @@ function waitTime(win::Window, time::Float64)
 end
 #-=================================================
 """
-	waitTimeMsec(time::Float64)
+	waitTimeMsec(time::Union{Float64, Int64})
 
 Pauses for a set amount of time. Time scale is in milliseconds, and does not 
 require a window to be passed to it..
@@ -220,7 +220,7 @@ function ConvertPsychoPyToFloatCoords(win::Window, coord::Vector{Float64})
 	return [x,y]
 end
 #----------
-function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Float64})
+function ConvertFloatCoordsToPixels(win::Window, coord::PsychoCoords)
 	_, displayHeight = getNativeSize(win)
 	x = round(Int64, coord[1] * displayHeight)
 	y = round(Int64, coord[2] * displayHeight)

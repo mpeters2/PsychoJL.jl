@@ -22,7 +22,7 @@ const repetitions = 30
 
 mutable struct ExperimentDesign	 	# we'll pass this around instead of globals
 	numTrials::Int64
-	trialSS::Vector{Int64}		  	# this holds the combination of SetSize control 
+	trialSS::Vector{Int64}		  	# This determines the set size on each trial 
 	trialTP::Vector{Int64}		  	# Target Presence
 	randomOrder::Vector{Int64}	  	# this will hold the random order in which the trials will be displayed.
 end
@@ -59,25 +59,12 @@ function showInstructions(win::Window, )
 	
 	x2 = win.pos[1]
 	y2 = win.pos[1]
-	x,y = getPos(win)
+	x,y = getNativeSize(win)
 	posMes = @sprintf("(%d, %d) (%d, %d)", x,y,x2,y2)
 	posText = TextStim(win, posMes, [100, 100 ])
 	posText.horizAlignment = -1
 	draw(posText)
 
-	w2 = Ref{Cint}()
-	h2 = Ref{Cint}()
-	SDL_GetWindowSize(win.win, w2, h2)
-	posText.textMessage = @sprintf("SDL_GetWindowSize (%d, %d)", w2[],h2[])
-	posText.pos = [100, 150 ]
-	draw(posText)
-
-	w3 = Ref{Cint}()
-	h3 = Ref{Cint}()
-	SDL_GL_GetDrawableSize(win.win, w3, h3)
-	posText.textMessage = @sprintf("SDL_GL_GetDrawableSize (%d, %d)", w3[],h3[])
-	posText.pos = [100, 200 ]
-	draw(posText)
 
 	line1 = Line(win, [x, 0], [x, y*2], width = 1, lineColor = [255,0,0,255] )
 	line2 = Line(win, [0, y], [x* 2, y], width = 1, lineColor = [0,0,255,255] )
@@ -174,7 +161,7 @@ function doATrial(win::Window, trialNum::Int64, trialInfo::ExperimentDesign, sub
 
 	# (4) Premake the stimuli
 	stimDrawList::Vector{TextStim} = []
-	_, gridSize = getSize(win)							# square display area, so grabbing window's height
+	_, gridSize = getNativeSize(win)							# square display area, so grabbing window's height
 	gridSize *= 0.9										# we'll use 90% of the area
 	gridSize *= 0.1										# and divide it into 10
 	xScootch, _ = win.pos								# find the middle of the window...

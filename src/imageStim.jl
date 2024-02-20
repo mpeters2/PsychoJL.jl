@@ -83,7 +83,7 @@ Draws an ImageStim to the back buffer.
  * rotation::Float64 (degrees)
 
 """
-function draw(theImageStim::ImageStim; magnification::Float64, rotation::Float64)
+function draw(theImageStim::ImageStim; magnification::Float64 = 1.0, rotation::Float64 =0.0)
 
 	if magnification == 0
 		centX = theImageStim._pos[1] - theImageStim.width÷2
@@ -105,7 +105,7 @@ function draw(theImageStim::ImageStim; magnification::Float64, rotation::Float64
 		SDL_RenderCopy(theImageStim.win.renderer, theImageStim.image, C_NULL, dest_ref)
 	else
 		center = SDL_Point(Cint(centX),  Cint(centY))
-		SDL_RenderCopyEx(theImageStim.win.renderer, theImageStim.image,  C_NULL,  dest_ref, angleDegrees, Ref{SDL_Point}(center), SDL_FLIP_NONE)
+		SDL_RenderCopyEx(theImageStim.win.renderer, theImageStim.image,  C_NULL,  dest_ref, rotation, Ref{SDL_Point}(center), SDL_FLIP_NONE)
 	end
 end
 #-----------------------
