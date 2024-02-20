@@ -1,6 +1,7 @@
 # Translation of psycopy window file to Julia
 
-export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
+export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow
+export getPos, getSize, setFullScreen, getNativeSize, getCenter
 export mouseVisible
 #
 
@@ -47,7 +48,9 @@ Constructor for a Window object
   * closeAndQuitPsychoJL()
   * closeWinOnly()
   * flip()
+  * getCenter
   * getPos()
+  * getNativeSize
   * getSize()
   * hideWindow()
   * mouseVisible()
@@ -102,7 +105,11 @@ println("asked for window size = ", size)
 		renderer = SDL_CreateRenderer(winPtr, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND)
 
-		baseFilePath = pwd()
+		#baseFilePath = pwd()
+		baseFilePath = pathof(PsychExpAPIs)
+		# ....julia/packages/PsychExpAPIs/cqE6w/src/PsychExpAPIs.jl
+		baseFilePath, _ = splitdir(baseFilePath)				# strip PsychExpAPIs.jl from the path
+		baseFilePath, _ = splitdir(baseFilePath)				# strip src from the path
 		baseFilePath =joinpath(baseFilePath,"fonts") 
 		baseFilePath =joinpath(baseFilePath,"Roboto") 
 		fontFilePath =joinpath(baseFilePath,"Roboto-Regular.ttf") 
@@ -245,9 +252,39 @@ function getPos(win::Window)
 end
 #----------
 """
+	getCenter(win::Window)
+
+Returns the center of the window in the units of the coordinate space.
+"""
+function getCenter(win::Window)
+
+	coordsTemp = getPos(win)
+	coords = zeros(2)
+	coords[1] = coordsTemp[1]		# quick and dirty way of translating MVector to Vector
+	coords[2] = coordsTemp[2]
+	return SDLcoords(win, coords)
+end
+#----------
+"""
+	getNativeSize(win::Window)
+
+Returns the width and height of the window in pixels. Dimensions can chage when going to full screen.
+"""
+function getNativeSize(win::Window)
+
+	w = Ref{Cint}()
+	h = Ref{Cint}()
+	SDL_GL_GetDrawableSize(win.win, w, h)
+	screenWidth = w[]
+	screenHeight = h[]
+	win.size = [screenWidth, screenHeight ]
+	return win.size
+end
+#----------
+"""
 	getSize(win::Window)
 
-Returns the width and height of the window. Dimensions can chage when going to full screen.
+Returns the width and height of the window depending int the units of the coordinate space. 
 """
 function getSize(win::Window)
 
@@ -257,7 +294,15 @@ function getSize(win::Window)
 	screenWidth = w[]
 	screenHeight = h[]
 	win.size = [screenWidth, screenHeight ]
-	return win.size
+	widthRatio = screenWidth/screenHeight
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	if win.coordinateSpace == "LT_Pix"
+		return win.size
+	elseif win.coordinateSpace == "LT_Percent" || win.coordinateSpace == "LB_Percent" || win.coordinateSpace == "PsychoPy"
+		return [widthRatio , 1.0 ]
+	else
+		error("Invalid coordinate space given: ", win.coordinateSpace)
+	end
 end
 #----------
 """

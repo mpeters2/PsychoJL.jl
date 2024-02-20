@@ -142,7 +142,7 @@ function genericMessage( message::String, imageName::String)
 	gFont = dialogWin.font
 
 	if gFont == C_NULL
-		println("*** Error: gFont is NULL")
+		error("*** Error: gFont is NULL")
 	end
 	SDL_PumpEvents()									# this erases whatever random stuff was in the backbuffer
 	SDL_SetRenderDrawColor(dialogWin.renderer, 250, 250, 250, 255)
@@ -307,7 +307,7 @@ function textInputDialog( promptString::String, defaultText::String)
 	gFont = dialogWin.font
 
 	if gFont == C_NULL
-		println("*** Error: gFont is NULL")
+		error("*** Error: gFont is NULL")
 	end
 	SDL_PumpEvents()					# this erases whatever random stuff was in the backbuffer
 	SDL_RenderClear(renderer)			#
@@ -398,7 +398,7 @@ function textInputDialog( promptString::String, defaultText::String)
 					else
 						newString = ""
 					end
-					println(cursorLocation," ",newString)
+					#println(cursorLocation," ",newString)
 					inputText = newString * last(inputText, cursorLocation)
 					#inputText = String(chop(inputText, tail = 1))				# remove last item; chop return a substring, so we have to cast it as String
 					renderText = true;
@@ -443,7 +443,7 @@ function textInputDialog( promptString::String, defaultText::String)
 				x = evt_mouseClick.x
 				y = evt_mouseClick.y
 				for butMap in buttonList
-					println(butMap.leftTop,", ",butMap.rightBottom)
+					#println(butMap.leftTop,", ",butMap.rightBottom)
 					if (butMap.rightBottom[1] > x > butMap.leftTop[1]) && (butMap.rightBottom[2] > y > butMap.leftTop[2])
 						butMap.state = "clicked"
 					end
@@ -451,7 +451,7 @@ function textInputDialog( promptString::String, defaultText::String)
 				for popMap in popList
 					if (popMap.rightBottom[1] > x > popMap.leftTop[1]) && (popMap.rightBottom[2] > y > popMap.leftTop[2])
 						#popMap.popUp.state = "clicked"
-						println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
+						#println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
 						stateChange(popMap)
 						draw(popMap.popUp, [x,y])					# enter pop-up button drawing and selection loop
 					end
@@ -626,7 +626,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 	gFont = dialogWin.font
 	#gFont = TTF_OpenFont("/Users/MattPetersonsAccount/Documents/Development/Julia/PsychoJL/sans.ttf", 36);		# global font
 	if gFont == C_NULL
-		println("*** Error: gFont is NULL")
+		error("*** Error: gFont is NULL")
 	end
 	SDL_PumpEvents()					# this erases whatever random stuff was in the backbuffer
 	SDL_RenderClear(Globals.renderer)			#
@@ -710,7 +710,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 					else
 						newString = ""
 					end
-					println(cursorLocation," ",newString)
+					#(cursorLocation," ",newString)
 					inputText = newString * last(inputText, cursorLocation)
 					#inputText = String(chop(inputText, tail = 1))				# remove last item; chop return a substring, so we have to cast it as String
 					renderText = true;
@@ -755,7 +755,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 				x = evt_mouseClick.x
 				y = evt_mouseClick.y
 				for butMap in buttonList
-					println(butMap.leftTop,", ",butMap.rightBottom)
+					#println(butMap.leftTop,", ",butMap.rightBottom)
 					if (butMap.rightBottom[1] > x > butMap.leftTop[1]) && (butMap.rightBottom[2] > y > butMap.leftTop[2])
 						butMap.state = "clicked"
 					end
@@ -763,7 +763,7 @@ function textInputDialog(dlgTitle::String, promptString::String, defaultText::St
 				for popMap in popList
 					if (popMap.rightBottom[1] > x > popMap.leftTop[1]) && (popMap.rightBottom[2] > y > popMap.leftTop[2])
 						#popMap.popUp.state = "clicked"
-						println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
+						#println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
 						stateChange(popMap)
 						draw(popMap.popUp, [x,y])					# enter pop-up button drawing and selection loop
 					end
@@ -930,7 +930,7 @@ Displays a dialog box constructed from a dictionary.
 **Inputs:** Dictionary defining the input fields (keys) and pre-filled values (values) for the user dialog\n
 If the value is a string, that indicates a text input box with a default value.
 If the value is a tuple, it indicates that the widget should be pop-up menu populated by the choices listed in the tuple\n
-**Outputs:** Dictionary of responses.  Keys are from the input dictionary.
+**Outputs:** Vector containing the button that was clicked and a dictionary of responses.  Keys are from the input dictionary.
 
 Example:
 ```julia
@@ -943,7 +943,7 @@ Example:
 ![alternative text](dlgDictSmall.png)
 """
 function DlgFromDict(dlgDict::Dict)
-	DEBUG = true
+	DEBUG = false
 	
 	SCREEN_WIDTH = 350
 	SCREEN_HEIGHT = 150
@@ -982,7 +982,7 @@ function DlgFromDict(dlgDict::Dict)
 	gFont = dialogWin.font
 
 	if gFont == C_NULL
-		println("*** Error: gFont is NULL")
+		error("*** Error: gFont is NULL")
 	end
 	SDL_PumpEvents()									# this erases whatever random stuff was in the backbuffer
 	SDL_SetRenderDrawColor(dialogWin.renderer, 250, 250, 250, 255)
@@ -999,7 +999,7 @@ function DlgFromDict(dlgDict::Dict)
 		if w[] > widestKey
 			widestKey = w[]
 		end
-		println(key,", ", w[])
+		#println(key,", ", w[])
 		label = TextStim(dialogWin, key, [20, 10 + (i*(h[] + 10)) ],
 							color = [0, 0, 0], 
 							fontSize = 24, 
@@ -1132,7 +1132,7 @@ function DlgFromDict(dlgDict::Dict)
 						else
 							newString = ""
 						end
-						println("\n.........",cursorLocation," ",newString) 
+						#println("\n.........",cursorLocation," ",newString) 
 						inputWidgets[focusedInput].valueText = newString * last(inputWidgets[focusedInput].valueText, cursorLocation)
 						#inputText = String(chop(inputText, tail = 1))				# remove last item; chop return a substring, so we have to cast it as String
 						renderText = true;
@@ -1184,9 +1184,9 @@ function DlgFromDict(dlgDict::Dict)
 			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )				# new version makes a list of clicked items, and the item with the focus is the winner
 				x = evt_mouseClick.x
 				y = evt_mouseClick.y
-				println("evt_mouseClick.x/y = ",x,", ", y )
+				#println("evt_mouseClick.x/y = ",x,", ", y )
 				for butMap in buttonList
-					println(butMap.leftTop,", ",butMap.rightBottom)
+					#println(butMap.leftTop,", ",butMap.rightBottom)
 					if (butMap.rightBottom[1] > x > butMap.leftTop[1]) && (butMap.rightBottom[2] > y > butMap.leftTop[2])
 						butMap.state = "clicked"
 					end
@@ -1199,9 +1199,9 @@ function DlgFromDict(dlgDict::Dict)
 				for i in eachindex(inputMapList)
 					inMap = inputMapList[i]
 					if (inMap.rightBottom[1] > x > inMap.leftTop[1]) && (inMap.rightBottom[2] > y > inMap.leftTop[2])
-						println("ooooo in a inMap")
-						println("  ooooo state ", inMap.parent.state )
-						println("    ooooo typeof ", typeof(inMap.parent))
+						#println("ooooo in a inMap")
+						#println("  ooooo state ", inMap.parent.state )
+						#println("    ooooo typeof ", typeof(inMap.parent))
 						push!(clickedItemIndexes, i)
 					end
 				end
@@ -1252,120 +1252,7 @@ function DlgFromDict(dlgDict::Dict)
 				end
 
 			end
-#=			
-			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )
-				# new version makes a list of clicked items, and the item with the focus is the winner
-				x = evt_mouseClick.x
-				y = evt_mouseClick.y
-				println("evt_mouseClick.x/y = ",x,", ", y )
-				clickedItemIndexes = []
-				for i in eachindex(inputMapList)
-					inMap = inputMapList[i]
-					if (inMap.rightBottom[1] > x > inMap.leftTop[1]) && (inMap.rightBottom[2] > y > inMap.leftTop[2])
-						println("ooooo in a inMap")
-						println("  ooooo state ", inMap.parent.state )
-						println("    ooooo typeof ", typeof(inMap.parent))
-						push!(clickedItemIndexes, i)
-					end
-				end
-				focusFound = false
-				for i in clickedItemIndexes
-					if inputMapList[i].parent.focus == true					# we found a winner!
-						focusFound = true
-						if typeof(inputMapList[i]) == ButtonMap
-							inputMapList[i].state = "clicked"
-						elseif typeof(inputMapList[i]) == PopUpMap
-							stateChange(inputMapList[i])
-							draw(inputMapList[i].parent, [x,y])
-						end
-					elseif focusFound == false						# we never found the focus, so go with the only one on the list.  If list is>0, send error
-						if length(clickedItemIndexes) == 1
-							inMap = inputMapList[i]
-							# set focus flags
-							if (inMap.rightBottom[1] > x > inMap.leftTop[1]) && (inMap.rightBottom[2] > y > inMap.leftTop[2])
-								focusedInput = i
-								inMap.parent.focus = true
-								println("focus = ", inMap.leftTop, inMap.rightBottom)
-							else
-								inMap.parent.focus = false
 
-
-			we are in a subset of clicked items. Need all so that we can unfocus the others.
-							end
-							# do widget specific stuff
-							if typeof(inputMapList[i]) == ButtonMap
-								inputMapList[i].state = "clicked"
-							elseif typeof(inputMapList[i]) == PopUpMap
-								stateChange(inputMapList[i])
-								draw(inputMapList[i].parent, [x,y])
-							end
-							focusedInput = i
-						else
-							#buf = 
-							error("\n*** You have a problem, as two or more widgets received a click \n", clickedItemIndexes,"\n")
-						end
-					end
-				end
-			end
-=#
-
-			
-#-----------------------------------------------------------------------------------------------------
-#			what about the lines setting and unsetting focus?	
-			# old version below
-			#=
-			elseif( evt_ty == SDL_MOUSEBUTTONDOWN )
-				x = evt_mouseClick.x
-				y = evt_mouseClick.y
-				println("evt_mouseClick.x/y = ",x,", ", y )
-				clickOverlap = false
-				# skip next part of mouse click overlaps with a popup whose state is "clicked"
-				for i in eachindex(inputMapList)
-					inMap = inputMapList[i]
-					if (inMap.rightBottom[1] > x > inMap.leftTop[1]) && (inMap.rightBottom[2] > y > inMap.leftTop[2])
-						println("ooooo in a inMap")
-						println("  ooooo state ", inMap.parent.state )
-						println("    ooooo typeof ", typeof(inMap.parent))
-						if inMap.parent.state == "clicked" && typeof(inMap.parent) == PopUpMenu
-							clickOverlap = true
-							println(">>>> clickOverlap = true")
-							stateChange(inMap)
-							draw(inMap.parent, [x,y])			# 	CALLED		# enter pop-up button drawing and selection loop
-						end
-					end
-				end
-				if clickOverlap == false			# skip these if the mouse click was in an open pop-up
-					for i in eachindex(inputMapList)
-						inMap = inputMapList[i]
-						if (inMap.rightBottom[1] > x > inMap.leftTop[1]) && (inMap.rightBottom[2] > y > inMap.leftTop[2])
-							focusedInput = i
-							inMap.parent.focus = true
-							println("focus = ", inMap.leftTop, inMap.rightBottom)
-						else
-							inMap.parent.focus = false
-						end
-					end
-					for butMap in buttonList
-						if (butMap.rightBottom[1] > x > butMap.leftTop[1]) && (butMap.rightBottom[2] > y > butMap.leftTop[2])
-							butMap.state = "clicked"
-						end
-					end
-					for popMap in  popUpList
-						if (popMap.rightBottom[1] > x > popMap.leftTop[1]) && (popMap.rightBottom[2] > y > popMap.leftTop[2])
-							#popMap.popUp.state = "clicked"
-							println("pre-state change ", popMap.leftTop,", ",popMap.rightBottom)
-							stateChange(popMap)
-							println("post-state change ", popMap.leftTop,", ",popMap.rightBottom)
-							
-							draw(popMap.parent, [x,y])			# 	CALLED		# enter pop-up button drawing and selection loop
-						end
-
-					end
-				end
-				println(">>>>>>>>>> button end ", bend)
-				bend+=1
-			end  # evt_ty == SDL_MOUSEBUTTONDOWN 
-			=#
 		end
 		#=
 		With text input enabled, your key presses will also generate SDL_TextInputEvents which simplifies things like shift key and caps lock. 
@@ -1382,7 +1269,7 @@ function DlgFromDict(dlgDict::Dict)
 				else								#Text is empty
 					#Render space texture
 					inputWidgets[focusedInput].valueText = " "
-					println("- draw 654: ", focusedInput)
+					#println("- draw 654: ", focusedInput)
 				end
 			end
 		end

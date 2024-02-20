@@ -205,7 +205,7 @@ mutable struct Line2
 			message = "startPoint needs two coordinates, got " * String(length(startPoint)) * " instead."
 			error(message)
 		end		
-		_, displayHeight = getSize(win)
+		_, displayHeight = getNativeSize(win)
 
 		if win.coordinateSpace == "PsychoPy"											
 			_startPoint[1] = round(Int64, (startPoint[1]+0.5) * displayHeight)		# convert PsychoPy to Percent coordinates first then percentage to pixels
@@ -465,7 +465,7 @@ mutable struct Ellipse
 		_fillColor = colorToSDL(win, fillColor)
 
 		if win.coordinateSpace != "LT_Pix"
-			_, displayHeight = getSize(win)								# get true height of window
+			_, displayHeight = getNativeSize(win)								# get true height of window
 			_rx = round(Int64, rx * displayHeight)								# convert percent to pixels
 			_ry = round(Int64, ry * displayHeight)								# convert percent to pixels
 			_pos = SDLcoords(win, pos)
@@ -596,7 +596,7 @@ mutable struct Circle
 		_lineColor = colorToSDL(win, lineColor)
 		_fillColor = colorToSDL(win, fillColor)
 		if win.coordinateSpace != "LT_Pix"
-			_, displayHeight = getSize(win)								# get true height of window
+			_, displayHeight = getNativeSize(win)								# get true height of window
 			_rad = round(Int64, rad * displayHeight)								# convert percent to pixels
 			_pos = SDLcoords(win, pos)
 		else

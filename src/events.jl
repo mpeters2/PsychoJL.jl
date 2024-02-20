@@ -14,7 +14,7 @@ or the timer runs out.
 **Inputs:**
  * win::Window
  * waitTime::Float64  *default is milliseconds*
-**Outputs**: returns the character that was pressed
+**Outputs**: returns the character that was pressed. For spaces, tabs, and /, it returns "space", "tab", or "slash".
 
 **Limitations**: currently only returns character keys. Arrow keys, tab, return, etc. do not work.
 
@@ -42,6 +42,8 @@ function waitKeys(win::Window, waitTime::Float64)
 						return "space"
 					elseif	textTemp == "	"		# tab
 						return "tab"
+					elseif	textTemp == "/"		# tab
+						return "slash"
 					else
 						return textTemp
 					end
@@ -65,9 +67,9 @@ Waits until a key is pressed.
 **Inputs:**
  * win::Window
 
-**Outputs**: returns the character that was pressed
+**Outputs**: returns the character that was pressed. For spaces, tabs, and /, it returns "space", "tab", or "slash".
 
-**Limitations**: currently only returns character keys. Arrow keys, tab, return, etc. do not work.
+**Limitations**: currently only returns character keys. Arrow keys, return, etc. do not work.
 """
 function getKey(win::Window)
 	#Enable text input
@@ -90,6 +92,8 @@ function getKey(win::Window)
 						keypressed = "space"
 					elseif	keypressed == "	"		# tab
 						keypressed = "tab"
+					elseif	keypressed == "/"		# tab
+						return "slash"
 					end
 					done = true
 				end

@@ -42,7 +42,8 @@ include( "soundStim.jl" )
 
 export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords
 export PsychoColor, PsychoCoords
-export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow, getPos, getSize, setFullScreen
+export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow
+export getPos, getSize, setFullScreen, getNativeSize, getCenter
 export mouseVisible
 export Rect, Ellipse, Line, Circle, ShapeStim, Polygon,  Line2
 export setColor, setLineColor, setFillColor, setPos

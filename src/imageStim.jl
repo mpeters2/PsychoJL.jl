@@ -80,9 +80,10 @@ Draws an ImageStim to the back buffer.
 
  **Optional Inputs:**
  * magnification::Float64
+ * rotation::Float64 (degrees)
 
 """
-function draw(theImageStim::ImageStim; magnification::Float64)
+function draw(theImageStim::ImageStim; magnification::Float64, rotation::Float64)
 
 	if magnification == 0
 		centX = theImageStim._pos[1] - theImageStim.width÷2
@@ -100,7 +101,11 @@ function draw(theImageStim::ImageStim; magnification::Float64)
 	end
 #	dest_ref[] = SDL_Rect(theImageStim.pos[1], theImageStim.pos[2], theImageStim.width, theImageStim.height)
 #println(theImageStim.pos[1],", ",theImageStim.pos[2],", ",theImageStim.width,", ",theImageStim.height)
-	SDL_RenderCopy(theImageStim.win.renderer, theImageStim.image, C_NULL, dest_ref)	
+	if rotation == 0.0
+		SDL_RenderCopy(theImageStim.win.renderer, theImageStim.image, C_NULL, dest_ref)
+	else
+		center = SDL_Point(Cint(centX),  Cint(centY))
+		SDL_RenderCopyEx(theImageStim.win.renderer, theImageStim.image,  C_NULL,  dest_ref, angleDegrees, Ref{SDL_Point}(center), SDL_FLIP_NONE)
 end
 #-----------------------
 """
@@ -115,3 +120,7 @@ function setPos(image::ImageStim, coords::PsychoCoords)
 	image.pos = coords
 
 end
+
+
+# Need: crop, rotate, set size
+

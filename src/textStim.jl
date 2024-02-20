@@ -29,6 +29,11 @@ Constructor for a TextStim object
 
 **Methods:**
   * draw()
+  * setColor()
+  * setFont()
+  * setPos()
+  * setSize()
+
 
 **Notes:**
 Using different font sizes requires loading them as different fonts.  For now it is easier
@@ -37,7 +42,7 @@ to load a large version of a font and using *scale* to scale the size of the res
 mutable struct TextStim	#{T}
 	win::Window
 	textMessage::String							# this will need to change to floats for Psychopy height coordiantes
-	pos::Vector{Int64}	
+	pos::PsychoCoords	
 	color::PsychoColor					# Union of strings, and float and int vectors
 	fontName::String						
 	fontSize::Int64
@@ -48,11 +53,11 @@ mutable struct TextStim	#{T}
 	style::String							# bold, italic, etc.
 	orientation::Int64
 	_color::Vector{Int64}
-
+	_pos::Vector{Int64}
 	#----------
 	function TextStim(win::Window,				
 					textMessage::String =  "future text",
-					pos::Vector{Int64} = [10,10];
+					pos::PsychoCoords = [10,10];
 					color::PsychoColor = "white",			# these will need to change to floats to handle Psychopy colors
 					fontName::String = "",
 					fontSize::Int64 = 12,
@@ -70,7 +75,7 @@ mutable struct TextStim	#{T}
 			println("*** Notice: have not implemented loading from system fonts yet")
 		end
 		_color = colorToSDL(win, color)
-
+		_pos = SDLcoords(win, pos)
 		new(win, 
 			textMessage ,
 			pos,
@@ -83,7 +88,8 @@ mutable struct TextStim	#{T}
 			vertAlignment,
 			style,
 			orientation,
-			_color
+			_color,
+			_pos
 			)
 
 	end
@@ -153,30 +159,30 @@ function draw(text::TextStim; wrapLength::Int64 = -1)
 
 	
 	if text.vertAlignment == -1											# top anchored
-		y = text.pos[2]
+		y = text._pos[2]
 		cy  = 0
 	elseif text.vertAlignment == 0											# center anchored
-		y = text.pos[2] - round(Int64, h[]/2)
-		cy = h[]÷2
+		y = text._pos[2] - round(Int64,(h[] * text.scale)/2)
+		cy = (h[] * text.scale)÷2
 	elseif text.vertAlignment == +1										# bottom anchored
-		y = text.pos[2] - h[]
+		y = text._pos[2] - (h[] * text.scale)
 		if y < singleHeight + 5													# enforce a minimum height so it doesn't go off the top.
 			y = 5
 		end
-		cy = h[]
+		cy = (h[]* text.scale)
 	else
 		error("invalid text vertical text alignment parameter")
 	end
 	#---------
 	if text.horizAlignment == -1											# left anchored
-		x = text.pos[1]
+		x = text._pos[1]
 		cx = 0
 	elseif text.horizAlignment == 0											# center justification
-		x = text.pos[1] - round(Int64, w[]/2)
-		cx = w[]÷2
+		x = text._pos[1] - round(Int64, (w[] * text.scale)/2)
+		cx = (w[] * text.scale) ÷2
 	elseif text.horizAlignment == +1										# right anchored
-		x = text.pos[1] - w[]
-		cx = w[]
+		x = text._pos[1] - (w[] * text.scale)
+		cx = (w[] * text.scale)
 	else
 		error("invalid text horizontal text alignment parameter")
 	end
@@ -239,6 +245,11 @@ end
 #----------
 function setFont(text::TextStim, fontName::String)
 	println("setFont(::TextStim, fontName) is a future placeholder for loading a font of the specified name")
+end
+#----------
+function setPos(text::TextStim, coords::PsychoCoords)
+	text._pos = SDLcoords(text.win, coords)				# internal coordinates
+	text.pos = coords									# user's coordinates
 end
 #-------------------------------
 const lineSpace = 2;

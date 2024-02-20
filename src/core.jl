@@ -93,7 +93,7 @@ require a window to be passed to it..
 **Inputs:** 64-bit float\n
 **Outputs:** Nothing
 """
-function waitTimeMsec(time::Float64)
+function waitTimeMsec(time::Union{Float64, Int64})
 	SDL_Delay(time)		
 end
 #-=================================================
@@ -206,15 +206,22 @@ function SDLcoords(win::Window, coords::Union{Vector{Int64}, Vector{Float64}})
 	end
 end
 #----------
-function ConvertPsychoPyToFloatCoords(coord::Vector{Float64})
-	x = coord[1] + 0.5
+function ConvertPsychoPyToFloatCoords(win::Window, coord::Vector{Float64})
+	#x = coord[1] + 0.5
+
+	# =($D5/2)-F9
+	#(ratio/2) - x
+	displayWidth, displayHeight = getNativeSize(win)
+	ratio = displayWidth/displayHeight
+	x = (ratio/2) - coord[1]
+
 	y = -coord[2] + 0.5
 
 	return [x,y]
 end
 #----------
 function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Float64})
-	_, displayHeight = getSize(win)
+	_, displayHeight = getNativeSize(win)
 	x = round(Int64, coord[1] * displayHeight)
 	y = round(Int64, coord[2] * displayHeight)
 
@@ -222,7 +229,7 @@ function ConvertFloatCoordsToPixels(win::Window, coord::Vector{Float64})
 end
 #----------
 function ConvertPsychoPyToPixels(win::Window, coord::Vector{Float64})
-	coord = ConvertPsychoPyToFloatCoords(coord)
+	coord = ConvertPsychoPyToFloatCoords(win, coord)
 	return ConvertFloatCoordsToPixels(win, coord)
 end
 #----------

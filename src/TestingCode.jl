@@ -75,8 +75,8 @@ function DemoWindow()
 	#println("Id number received is", IDnumber)
 
 	myWin = Window( [2560, 1440], false)			#	2560, 1440			[1000,1000]
-	reportedSize = getSize(myWin)
-	println("getSize() Window size = ", reportedSize )
+	reportedSize = getNativeSize(myWin)
+	println("getNativeSize() Window size = ", reportedSize )
 	newColor = colorToSDL(myWin, "powderblue")
 	t1 = TextStim(myWin,  "powderblue", [100, 300], color = "powderblue")
 	t2 = TextStim(myWin,  "255, 128, 0 ,255", [100, 400], color = [255, 128, 0 ,255])
@@ -386,7 +386,7 @@ end
 	myImage = ImageStim(myWin, imagePath, [250,400])
 	draw(myImage, magnification = 10.0)
 	#---------------------
-	winSize = getSize(myWin)
+	winSize = getNativeSize(myWin)
 	x = round(Int64, winSize[2]/2)
 	widthRatio = winSize[1]/winSize[2]
 
