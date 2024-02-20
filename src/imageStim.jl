@@ -106,6 +106,7 @@ function draw(theImageStim::ImageStim; magnification::Float64, rotation::Float64
 	else
 		center = SDL_Point(Cint(centX),  Cint(centY))
 		SDL_RenderCopyEx(theImageStim.win.renderer, theImageStim.image,  C_NULL,  dest_ref, angleDegrees, Ref{SDL_Point}(center), SDL_FLIP_NONE)
+	end
 end
 #-----------------------
 """
