@@ -99,7 +99,8 @@ mutable struct PopUpMenu
 		for i in eachindex(options)								# make text stimuli for each entry
 			popUpText = TextStim(win, options[i],	[0, 0]; color = txtColor)
 			#popUpText.pos = [leftTop[1] + 4 , pos[2] ]
-			popUpText.pos = [leftTop[1] + 10 , rightBottom[2]-4 ]
+			#popUpText.pos = [leftTop[1] + 10 , rightBottom[2]-4 ]
+			setPos(popUpText, [leftTop[1] + 10 , rightBottom[2]-4 ] )
 			#popUpText.color = txtColor
 			popUpText.fontSize = 24
 			popUpText.horizAlignment = -1
@@ -187,8 +188,8 @@ function draw(popUp::PopUpMenu, mousePos::Vector{Int32} )			# Int32 because that
 		#---------
 		# draw text			...maybe move this inside the constructor
 		popUpText = popUp.menuTexts[popUp.selectionIndex] #				TextStim(popUp.win, popUp.options[selection],	[0, 0])
-		#popUpText.pos = [popUp.leftTop[1] + 4 , popUp.pos[2] ]
-		popUpText.pos = [popUp.leftTop[1] + 10 , popUp.rightBottom[2]-4 ]
+		#popUpText.pos = [popUp.leftTop[1] + 10 , popUp.rightBottom[2]-4 ]
+		setPos(popUpText, [popUp.leftTop[1] + 10 , popUp.rightBottom[2]-4 ] )
 		draw(popUpText)
 		# ********************
 		#popUpSymbol = TextStim(popUp.win, "▼",	[0, 0])
@@ -245,9 +246,10 @@ function draw(popUp::PopUpMenu, mousePos::Vector{Int32} )			# Int32 because that
 		#------
 		for i in eachindex(popUp.options)
 			#options[i]
+			xCoord = popUp.fullLT[1]
 			yCoord = popUp.fullLT[2] + (popUp.selectionHeight * (i-1))
-			#popUp.menuTexts[i].pos = [popUp.leftTop[1] + 4 , yCoord + (popUp.selectionHeight÷2)]
-			popUp.menuTexts[i].pos[2] = yCoord + (popUp.selectionHeight÷1)
+			#popUp.menuTexts[i].pos[2] = yCoord + (popUp.selectionHeight÷1)
+			setPos(popUp.menuTexts[i], [xCoord , yCoord + (popUp.selectionHeight÷1) ] )
 			draw(popUp.menuTexts[i])
 			#println("Ycoord = ", yCoord,", top = ", popUp.fullLT[2],", bottom = ", popUp.fullRB[2])
 			# set coords of each then draw

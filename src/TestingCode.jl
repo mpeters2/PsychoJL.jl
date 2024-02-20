@@ -77,6 +77,46 @@ function DemoWindow()
 	myWin = Window( [2560, 1440], false)			#	2560, 1440			[1000,1000]
 	reportedSize = getNativeSize(myWin)
 	println("getNativeSize() Window size = ", reportedSize )
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+	centerText = TextStim(myWin, "C__.__r", [500,500], horizAlignment = 0)
+	draw(centerText)
+	centerText.orientation = 45.0
+	draw(centerText)
+	centerText.orientation = 90.0
+	draw(centerText)
+
+	leftText = TextStim(myWin, "L__.__t", [700,500],  horizAlignment = -1)
+	draw(leftText)
+	leftText.orientation = 45.0
+	draw(leftText)
+	leftText.orientation = 90.0
+	draw(leftText)
+
+	rightText = TextStim(myWin, "R__.__t", [900,500],  horizAlignment = +1)
+	draw(rightText)
+	rightText.orientation = 45.0
+	draw(rightText)
+	rightText.orientation = 90.0
+	draw(rightText)
+
+	flip(myWin)
+	getKey(myWin)
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+
+	parentDir = pathof(PsychExpAPIs)
+	parentDir, _ = splitdir(parentDir)				# strip PsychExpAPIs.jl from the path
+	parentDir, _ = splitdir(parentDir)				# strip src from the path
+	parentDir = joinpath(parentDir, "artifacts")
+	#filePath = joinpath(parentDir, imageName)
+	imagePath = joinpath(parentDir,  "white_bus-cropped.png")
+	busImage = ImageStim(myWin, imagePath, [1000,1000])
+	draw(busImage, orientation = 0.0)
+	draw(busImage, orientation = 45.0)
+	scaleToWidth(busImage, 200)
+	draw(busImage, orientation = 90.0)
+	flip(myWin)
+	getKey(myWin)
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 	newColor = colorToSDL(myWin, "powderblue")
 	t1 = TextStim(myWin,  "powderblue", [100, 300], color = "powderblue")
 	t2 = TextStim(myWin,  "255, 128, 0 ,255", [100, 400], color = [255, 128, 0 ,255])

@@ -49,7 +49,7 @@ export Rect, Ellipse, Line, Circle, ShapeStim, Polygon,  Line2
 export setColor, setLineColor, setFillColor, setPos
 export TextStim, TextStimExp, setColor
 export waitKeys, getKey
-export ImageStim
+export ImageStim, scaleToWidth
 export infoMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
 export alertMessage, happyMessage
 export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA
