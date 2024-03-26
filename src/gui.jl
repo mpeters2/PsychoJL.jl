@@ -3,7 +3,6 @@
 #using .Gtk: draw as GTKdraw
 #import Gtk			# this prevents namespace collisions between Gtk's draw() and PsychoJL's draw() functions
 include("guiUtilityFunctions.jl")
-using Dates
 
 export displayMessage, askQuestionDialog, fileOpenDlg,  inputDialog, textInputDialog, DlgFromDict
 export infoMessage, happyMessage, warningMessage, errorMessage
@@ -21,6 +20,7 @@ const SDLK_LEFT = 1073741904
 const SDLK_RIGHT = 1073741903
 
 #-==========================================================================================================
+#=
 function fileOpenDlg()
 	file = Gtk.open_dialog_native("My first file dialog")
 	filehandle = Gtk.open("$file");
@@ -28,6 +28,7 @@ function fileOpenDlg()
 	Gtk.close(filehandle); 
 	Netlist_lines[1][begin:3]
 end
+=#
 #-=============================================
 #!["picture of a displayMessage dialog"](displayMessage.png)
 """
@@ -161,7 +162,11 @@ function genericMessage( message::String, imageName::String)
 	draw(label, wrapLength = round(Int64,SCREEN_WIDTH*1.5)-50 )			# SCREEN_WIDTH seems weird, but retina doubles/halves everything
 	#---------
 	# draw alert
-	parentDir = pwd()
+	#parentDir = pwd()
+	parentDir = pathof(PsychExpAPIs)
+	parentDir, _ = splitdir(parentDir)				# strip PsychExpAPIs.jl from the path
+	parentDir, _ = splitdir(parentDir)				# strip src from the path
+
 	filePath = joinpath(parentDir, "artifacts")
 	filePath = joinpath(filePath, imageName)
 	#symbol = ImageStim(	dialogWin, filePath,  [round(Int64, SCREEN_WIDTH *0.2), CENTERY] )
@@ -185,7 +190,11 @@ function genericMessage( message::String, imageName::String)
 	OKmap = ButtonMap(OKbutton, "OK-clicked")
 	#---------
 	# Play alert sound
-	parentDir = pwd()
+	#parentDir = pwd()
+	parentDir = pathof(PsychExpAPIs)
+	parentDir, _ = splitdir(parentDir)				# strip PsychExpAPIs.jl from the path
+	parentDir, _ = splitdir(parentDir)				# strip src from the path
+
 	filePath = joinpath(parentDir, "artifacts")
 	filePath = joinpath(filePath, "qbeep-10db.wav")
 	mySound = SoundStim(filePath)

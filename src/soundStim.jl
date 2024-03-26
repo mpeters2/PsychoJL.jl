@@ -39,7 +39,10 @@ struct ErrSound
 	#----------
 	function ErrSound()
 
-	parentDir = pwd()
+	#parentDir = pwd()
+	parentDir = pathof(PsychExpAPIs)
+	parentDir, _ = splitdir(parentDir)				# strip PsychExpAPIs.jl from the path
+	parentDir, _ = splitdir(parentDir)				# strip src from the path
 	filePath = joinpath(parentDir, "artifacts")
 	filePath = joinpath(filePath, "ErrSound-10db.wav")					
 	if isfile(filePath)
@@ -86,10 +89,10 @@ function testSound()
 
 	#Load the music
 	aud_files = dirname(@__FILE__)
-	parentDir = pwd()
-	#println("original directory: ", originalDir)		# artifacts
-	#parentDir = splitdir(pwd())[1]
-	#println("parent directory: ", parentDir)		# artifacts
+	#parentDir = pwd()
+	parentDir = pathof(PsychExpAPIs)
+	parentDir, _ = splitdir(parentDir)				# strip PsychExpAPIs.jl from the path
+	parentDir, _ = splitdir(parentDir)				# strip src from the path
 	filePath = joinpath(parentDir, "artifacts")
 	filePath = joinpath(filePath, "ErrSound.wav")
 

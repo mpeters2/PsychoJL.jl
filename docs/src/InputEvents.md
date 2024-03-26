@@ -1,7 +1,7 @@
 # Input Events
 * Functions
-  - [`getKey(win::Window)`](@ref manualDrawHeader)
-  - [`waitKeys(win::Window, waitTime::Float64)`](@ref manualSetPosHeader)
+  - [`getKey(win::Window)`](@ref)
+  - [`waitKeys(win::Window, waitTime::Float64)`](@ref)
 
 ```@docs
 getKey(win::Window)

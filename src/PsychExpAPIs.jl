@@ -40,16 +40,16 @@ include( "popUpMenu.jl" )
 include( "timings.jl" )
 include( "soundStim.jl" )
 
-export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords
-export PsychoColor, PsychoCoords
+export InitPsychoJL,  MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords, SDLsize
+export PsychoColor, PsychoCoords, ConvertPixelSizeToFloats, openLogFile, logOut
 export Window, closeAndQuitPsychoJL, flip, closeWinOnly, hideWindow
 export getPos, getSize, setFullScreen, getNativeSize, getCenter
-export mouseVisible
+export mouseVisible, getScreenShot, flipCache, flip2
 export Rect, Ellipse, Line, Circle, ShapeStim, Polygon,  Line2
 export setColor, setLineColor, setFillColor, setPos
 export TextStim, TextStimExp, setColor
 export waitKeys, getKey
-export ImageStim, scaleToWidth
+export ImageStim, scaleToWidth, scaleToWidth2, drawCache
 export infoMessage, inputDialog, askQuestionDialog, fileOpenDlg, textInputDialog, DlgFromDict
 export alertMessage, happyMessage
 export roundedRectangleRGBA, aaRoundRectRGBA, wuAACircle, aaRoundRectRGBAThick, aaFilledRoundRectRGBA

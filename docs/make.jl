@@ -10,6 +10,14 @@ makedocs(	modules = [PsychExpAPIs],
 
 			pages = [
 				"Home" => "index.md",
+				"Tutorial: Spatial Stroop" => [
+					"Tutorial_SpatialStroop.md",
+					"Tutorial_SpatialStroop_constants.md",
+					"Tutorial_SpatialStroop_main.md",
+					"Tutorial_SpatialStroop_ExpDesign.md",
+					"Tutorial_SpatialStroop_SubjInfo.md",
+					"Tutorial_SpatialStroop_ShowInstructions.md"
+					],
 				"Initialization and Timing" => "InitializationAndTiming.md",
 				"Windows" => "Windows.md",
 				"Colors" => "Colors.md",

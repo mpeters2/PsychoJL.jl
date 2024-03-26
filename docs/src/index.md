@@ -68,7 +68,8 @@ stim.textMessage = "Goodbye, world!"
 Julia can be many orders of magnitude faster than Python. My biggest performance tip is, despite their similarities,
 do not write Julia programs like you would write a Python program.
 
-##### Global Variables
+
+### [Global Variables](@id globals)
 For example, although Julia can use global variables, the use of global variables (global constants are OK)
 [prevents the optimizing compiler from optimizing](https://docs.julialang.org/en/v1/manual/performance-tips/).
 Instead, pass around structs containing what would have been written as global variables in a Python program.
@@ -92,7 +93,7 @@ hold what would have otherwise been a global variable in another language.  Call
 starting time in the Window you passsed to it.  Likewise, `stopTimer()` uses the information stored in the Window structure
 to calculate the elapsed time.
 
-##### Variable Typing
+### [Variable Typing](@id variableTyping)
 
 Like Python, Julia can infer variables' types. However, Julia can be faster when it does not need to infer types.  For example,
 the parameter for this function is perfectly legal (from a syntactic point of view):
@@ -116,7 +117,7 @@ As you might have noticed by the documentation, PsychoJL is strongly typed.  Fut
 multiple-dispatch (i.e. overloading) will be less strict with their types. For example, for the `startPoint`
 and `endPoint`, `Line()` requires a vector of two integers.  In the future, it will allow vectors of floats. [edit: the future is here!]
 
-##### Integer Division
+### Integer Division
 
 When dividing variables that should remain integers, Julia's integer division operand `÷` (not `/`!) is 
 extremely useful. Dividing integers using the standard division operand `\` can return a float. For example:

@@ -41,12 +41,12 @@ PsychoJL has several diferent coordinate systems available.
  !["picture of an LB_Percent screen"](assets/LB_Percent.png)
  
  ---
-  ## Psychopy
+  ## [Psychopy](@id PsychoPyCoordinates)
 
  The origin is in the middle of the screen, positive y-values go upward, and the units of measure are percentage of the height.
  The height dimension always ranges from -0.5 to +0.5, but width varies depending on the aspect ratio of the window.
  In the example below, the aspect ratio is 1.7778:1 (2560 x 1440).
  All units are floating point (Float64).
 
- !["picture of an LB_Percent screen"](assets/Psychopy.png)
+ !["picture of PsychoPy coordinate screen"](assets/Psychopy.png)
  

@@ -1,15 +1,16 @@
 # Translation of psycopy window file to Julia
 
-export InitPsychoJL, MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords
-export PsychoColor, PsychoCoords
+export InitPsychoJL, MakeInt8Color, waitTime, waitTimeMsec, colorToSDL, SDLcoords, SDLsize
+export PsychoColor, PsychoCoords, ConvertPixelSizeToFloats, openLogFile, logOut
 using Colors
+using Dates
 
 #using SimpleDirectMediaLayer
 #using SimpleDirectMediaLayer.LibSDL2
 
 
 PsychoColor = Union{String, Vector{Int64}, Vector{Float64}}
-PsychoCoords = Union{ Vector{Int64}, Vector{Float64}}
+PsychoCoords = Union{Vector{Int64}, Vector{Int32}, Vector{Float64}}
 
 
 #----------
@@ -25,11 +26,33 @@ function InitPsychoJL()
 
 	@assert SDL_Init(SDL_INIT_EVERYTHING) == 0 "error initializing SDL: $(unsafe_string(SDL_GetError()))"
 	@assert TTF_Init() == 0 "error initializing TTF_Init: $(unsafe_string(SDL_GetError()))"
+	#---------
+	flags = IMG_INIT_JPG | IMG_INIT_PNG
+	initted = IMG_Init(flags);
+	if ((initted & flags) != flags)
+		println("IMG_Init: Failed to init required jpg and png support!\n")
+		error("IMG_Init: %s\n", IMG_GetError())
+	end
+
+	#---------
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 16)			# the number of multisample anti-aliasing buffers.
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16)			# the number of samples used around the current pixel used for multisample anti-aliasing
 	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 1024) < 0)
 		println("SDL_mixer could not initialize!", Mix_GetError())
 	end
+end
+#-=================================================
+function openLogFile()
+	return open("logFile.txt","a")
+end
+#-=================================================
+function logOut(logFile, message)
+	dt = now()
+	dtString = Dates.format(dt, "yyyy-mm-dd HH:MM:SS")
+	message = dtString * ": " * message * "\n"
+	write(logFile,message)
+	flush(logFile)
+	println(message)
 end
 #-=================================================
 #=
@@ -136,6 +159,7 @@ function colorToSDL(win::Window, inColor::Vector{Int64})
 		error("color is too short.  Only ", length(inColor)," values given")
 	end
 end
+
 #-------------------------
 # below tranlates decimal (0.0-1.0) and PsychoPy (-1.0 - +1.0) to rgba255
 function colorToSDL(win::Window, inColor::Vector{Float64})
@@ -188,7 +212,78 @@ function colorToSDL(win::Window, inColor::String)
 	end
 
 end
-#-====================================================
+#-------------------------
+# These versions are only used by a Window
+function colorToSDL(colorSpace::String, inColor::Vector{Int64})
+
+	if colorSpace != "rgba255" && colorSpace != "rgb255"
+		error("Mismatch between colorspace.  Given integer vector, but colorspace is ", colorSpace)
+	end
+	
+	if length(inColor) == 4
+		return inColor
+	elseif length(inColor) == 3
+		outColor = zeros(Int64, 4)
+		for i in eachindex(inColor)
+			outColor[i] = inColor[i]
+		end
+		outColor[4] = 255
+		return outColor
+	else
+		error("color is too short.  Only ", length(inColor)," values given")
+	end
+end
+#----------
+function colorToSDL(colorSpace::String, inColor::String)
+
+	if haskey(Colors.color_names, inColor)
+		theColor = Colors.color_names[inColor]				# color is an rgba255
+		outColor = zeros(Int64, 4)
+		for i in eachindex(theColor)						# have to convert tuple to vector
+			outColor[i] = theColor[i]
+		end
+		if length(theColor) == 3							# add alpha if necessary
+			outColor[4] = 255
+		end
+		return outColor
+	else
+		error("Color name ", inColor," could not be found in Colors.jl")
+	end
+
+end
+#-=============================================================================
+# convert image width and height to SDL
+function SDLsize(win::Window, size::Union{Vector{Int64}, Vector{Int32}, Vector{Float64}})
+	if win.coordinateSpace == "LT_Pix"
+		return size
+	elseif win.coordinateSpace == "LT_Percent"			# origin is left top, width is percent of height
+		return ConvertPixelSizeToFloats(win, size)
+	elseif win.coordinateSpace == "LB_Percent"			# origin is left bott0m, width is percent of height
+		return ConvertPixelSizeToFloats(win, size)
+	elseif win.coordinateSpace == "PsychoPy"			# origin is left bott0m, width is percent of height
+		return ConvertPixelSizeToFloats(win, size)
+	else
+		error("Invalid coordinate space given: ", win.coordinateSpace)
+	end
+end
+#----------
+function ConvertPixelSizeToFloats(win::Window, size::PsychoCoords)
+	_, displayHeight = getNativeSize(win)
+	x = size[1] / displayHeight
+	y = size[2] / displayHeight
+
+	return [x,y]
+end
+#----------
+function ConvertFloatToPixelSize(win::Window, size::PsychoCoords)
+	_, displayHeight = getNativeSize(win)
+	x = size[1] * displayHeight
+	y = size[2] * displayHeight
+
+	return [x,y]
+end
+#-=============================================================================
+# converts coords to local coordinate system (?)
 function SDLcoords(win::Window, coords::Union{Vector{Int64}, Vector{Float64}})
 
 	if win.coordinateSpace == "LT_Pix"
