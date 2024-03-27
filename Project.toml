@@ -1,7 +1,7 @@
 name = "PsychExpAPIs"
 uuid = "77c98508-ef4f-4ba4-b29c-7765a84ccfdf"
 authors = ["Matthew Steely Peterson"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
